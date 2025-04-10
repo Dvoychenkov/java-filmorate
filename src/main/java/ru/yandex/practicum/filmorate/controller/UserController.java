@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +33,7 @@ public class UserController {
         return user;
     }
 
+    @PutMapping
     public User update(@RequestBody User newUser) {
         if (newUser.getId() == null || !users.containsKey(newUser.getId())) {
             throw new ValidationException("Пользователь с указанным ID не найден");
@@ -64,7 +65,10 @@ public class UserController {
             user.setName(user.getLogin());
         }
 
-        if (user.getBirthday() == null || user.getBirthday().isAfter(Instant.now())) {
+        if (user.getBirthday() == null) {
+            throw new ValidationException("Пустая дата рождения пользователя");
+        }
+        if (user.getBirthday().isAfter(LocalDate.now())) {
             throw new ValidationException("Дата рождения пользователя больше текущей даты");
         }
     }
@@ -95,7 +99,7 @@ public class UserController {
         }
 
         if (newUser.getBirthday() != null) {
-            if (newUser.getBirthday().isAfter(Instant.now())) {
+            if (newUser.getBirthday().isAfter(LocalDate.now())) {
                 throw new ValidationException("Дата рождения пользователя больше текущей даты");
             }
             existingUser.setBirthday(newUser.getBirthday());
