@@ -1,11 +1,9 @@
 package ru.yandex.practicum.filmorate.exception;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class ValidationException extends RuntimeException {
-    private final static Logger log = LoggerFactory.getLogger(ValidationException.class);
-
     public ValidationException(String message) {
         super(message);
         log.error("Ошибка валидации: {}", message);
