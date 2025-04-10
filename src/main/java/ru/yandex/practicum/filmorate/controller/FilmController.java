@@ -27,7 +27,7 @@ public class FilmController {
 
     @PostMapping
     public Film create(@RequestBody Film film) {
-        validateForCreate(film);
+        validate(film);
         film.setId(idCounter++);
         films.put(film.getId(), film);
         log.info("Создан фильм: {}", film);
@@ -35,18 +35,17 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film update(@RequestBody Film newFilm) {
-        if (newFilm.getId() == null || !films.containsKey(newFilm.getId())) {
+    public Film update(@RequestBody Film film) {
+        if (film.getId() == null || !films.containsKey(film.getId())) {
             throw new ValidationException("Фильм с указанным ID не найден");
         }
-
-        Film existingFilm = films.get(newFilm.getId());
-        validateForUpdate(newFilm, existingFilm);
-        log.info("Обновлён фильм: {}", existingFilm);
-        return existingFilm;
+        validate(film);
+        films.put(film.getId(), film);
+        log.info("Обновлён фильм: {}", film);
+        return film;
     }
 
-    private void validateForCreate(Film film) {
+    private void validate(Film film) {
         if (film.getName() == null || film.getName().isBlank()) {
             throw new ValidationException("Пустое название фильма");
         }
@@ -70,39 +69,6 @@ public class FilmController {
         }
         if (film.getDuration() < 1) {
             throw new ValidationException("Продолжительность фильма должна быть положительной");
-        }
-    }
-
-    private void validateForUpdate(Film newFilm, Film existingFilm) {
-        if (newFilm.getName() != null) {
-            if (newFilm.getName().isBlank()) {
-                throw new ValidationException("Пустое название фильма");
-            }
-            existingFilm.setName(newFilm.getName());
-        }
-
-        if (newFilm.getDescription() != null) {
-            if (newFilm.getDescription().isBlank()) {
-                throw new ValidationException("Пустое описание фильма");
-            }
-            if (newFilm.getDescription().length() > MAX_FILM_DESC_LEN) {
-                throw new ValidationException("Описание фильма превышает допустимое количество символов");
-            }
-            existingFilm.setDescription(newFilm.getDescription());
-        }
-
-        if (newFilm.getReleaseDate() != null) {
-            if (newFilm.getReleaseDate().isBefore(FILM_B_DAY)) {
-                throw new ValidationException("Дата релиза фильма не может быть раньше 28 декабря 1895 года");
-            }
-            existingFilm.setReleaseDate(newFilm.getReleaseDate());
-        }
-
-        if (newFilm.getDuration() != null) {
-            if (newFilm.getDuration() < 0) {
-                throw new ValidationException("Продолжительность фильма должна быть положительной");
-            }
-            existingFilm.setDuration(newFilm.getDuration());
         }
     }
 }

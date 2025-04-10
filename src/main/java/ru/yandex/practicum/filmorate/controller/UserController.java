@@ -26,7 +26,7 @@ public class UserController {
 
     @PostMapping
     public User create(@RequestBody User user) {
-        validateForCreate(user);
+        validate(user);
         user.setId(idCounter++);
         users.put(user.getId(), user);
         log.info("Создан пользователь: {}", user);
@@ -34,18 +34,17 @@ public class UserController {
     }
 
     @PutMapping
-    public User update(@RequestBody User newUser) {
-        if (newUser.getId() == null || !users.containsKey(newUser.getId())) {
+    public User update(@RequestBody User user) {
+        if (user.getId() == null || !users.containsKey(user.getId())) {
             throw new ValidationException("Пользователь с указанным ID не найден");
         }
-
-        User existingUser = users.get(newUser.getId());
-        validateForUpdate(newUser, existingUser);
-        log.info("Обновлён пользователь: {}", existingUser);
-        return existingUser;
+        validate(user);
+        users.put(user.getId(), user);
+        log.info("Обновлён пользователь: {}", user);
+        return user;
     }
 
-    private void validateForCreate(User user) {
+    private void validate(User user) {
         if (user.getEmail() == null || user.getEmail().isBlank()) {
             throw new ValidationException("Пустой e-mail пользователя");
         }
@@ -70,39 +69,6 @@ public class UserController {
         }
         if (user.getBirthday().isAfter(LocalDate.now())) {
             throw new ValidationException("Дата рождения пользователя больше текущей даты");
-        }
-    }
-
-    private void validateForUpdate(User newUser, User existingUser) {
-        if (newUser.getEmail() != null) {
-            if (newUser.getEmail().isBlank()) {
-                throw new ValidationException("Пустой e-mail пользователя");
-            }
-            if (!newUser.getEmail().contains("@")) {
-                throw new ValidationException("Некорректный e-mail пользователя");
-            }
-            existingUser.setEmail(newUser.getEmail());
-        }
-
-        if (newUser.getLogin() != null) {
-            if (newUser.getLogin().isBlank()) {
-                throw new ValidationException("Пустой логин пользователя");
-            }
-            if (newUser.getLogin().matches(REGEX_SPACES)) {
-                throw new ValidationException("Логин пользователя содержит пробелы");
-            }
-            existingUser.setLogin(newUser.getLogin());
-        }
-
-        if (newUser.getName() != null && !newUser.getName().isBlank()) {
-            existingUser.setName(newUser.getName());
-        }
-
-        if (newUser.getBirthday() != null) {
-            if (newUser.getBirthday().isAfter(LocalDate.now())) {
-                throw new ValidationException("Дата рождения пользователя больше текущей даты");
-            }
-            existingUser.setBirthday(newUser.getBirthday());
         }
     }
 }
