@@ -1,5 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -12,6 +14,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/users")
 public class UserController {
+    private final static Logger log = LoggerFactory.getLogger(UserController.class);
     private final Map<Long, User> users = new HashMap<>();
     private long idCounter = 1;
     private static final String REGEX_SPACES = ".*\\s+.*";
@@ -26,6 +29,7 @@ public class UserController {
         validateForCreate(user);
         user.setId(idCounter++);
         users.put(user.getId(), user);
+        log.info("Создан пользователь: {}", user);
         return user;
     }
 
@@ -36,6 +40,7 @@ public class UserController {
 
         User existingUser = users.get(newUser.getId());
         validateForUpdate(newUser, existingUser);
+        log.info("Обновлён пользователь: {}", existingUser);
         return existingUser;
     }
 
@@ -55,6 +60,7 @@ public class UserController {
         }
 
         if (user.getName() == null || user.getName().isBlank()) {
+            log.warn("Имя пользователя пустое, за основу взят логин");
             user.setName(user.getLogin());
         }
 

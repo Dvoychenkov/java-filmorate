@@ -1,5 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -12,6 +14,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/films")
 public class FilmController {
+    private final static Logger log = LoggerFactory.getLogger(FilmController.class);
     private final Map<Long, Film> films = new HashMap<>();
     private long idCounter = 1;
     private static final Instant FILM_B_DAY = Instant.parse("1895-12-28T00:00:00Z");
@@ -27,6 +30,7 @@ public class FilmController {
         validateForCreate(film);
         film.setId(idCounter++);
         films.put(film.getId(), film);
+        log.info("Создан фильм: {}", film);
         return film;
     }
 
@@ -37,6 +41,7 @@ public class FilmController {
 
         Film existingFilm = films.get(newFilm.getId());
         validateForUpdate(newFilm, existingFilm);
+        log.info("Обновлён фильм: {}", existingFilm);
         return existingFilm;
     }
 
