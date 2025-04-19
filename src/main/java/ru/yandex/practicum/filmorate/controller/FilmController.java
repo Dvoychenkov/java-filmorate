@@ -1,43 +1,39 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @RestController
 @RequestMapping("/films")
+@RequiredArgsConstructor
 public class FilmController {
-    private final Map<Long, Film> films = new HashMap<>();
-    private long idCounter = 1;
+    private final FilmStorage filmStorage;
 
     @GetMapping
     public Collection<Film> getAll() {
-        return films.values();
+        return filmStorage.getAll();
     }
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        film.setId(idCounter++);
-        films.put(film.getId(), film);
-        log.info("Создан фильм: {}", film);
-        return film;
+        Film created = filmStorage.add(film);
+        log.info("Создан фильм: {}", created);
+        return created;
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
-        if (film.getId() == null || !films.containsKey(film.getId())) {
-            throw new ValidationException("Фильм с указанным ID не найден");
-        }
-
-        films.put(film.getId(), film);
-        log.info("Обновлён фильм: {}", film);
-        return film;
+        Film updated = filmStorage.update(film);
+        log.info("Обновлён фильм: {}", updated);
+        return updated;
     }
+
+    // TODO getById
 }
