@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
@@ -9,9 +9,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
+@Primary
 public class InMemoryUserStorage implements UserStorage {
     private final Map<Long, User> users = new HashMap<>();
     private long idCounter = 1;
+
+    @Override
+    public Collection<User> getAll() {
+        return users.values();
+    }
 
     @Override
     public User add(User user) {
@@ -23,17 +29,9 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User update(User user) {
-        if (user.getId() == null || !users.containsKey(user.getId())) {
-            throw new ValidationException("Пользователь с указанным ID не найден");
-        }
         normalizeUser(user);
         users.put(user.getId(), user);
         return user;
-    }
-
-    @Override
-    public Collection<User> getAll() {
-        return users.values();
     }
 
     @Override

@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -9,9 +10,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
+@Primary
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Long, Film> films = new HashMap<>();
     private long idCounter = 1;
+
+    @Override
+    public Collection<Film> getAll() {
+        return films.values();
+    }
 
     @Override
     public Film add(Film film) {
@@ -22,16 +29,8 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film update(Film film) {
-        if (film.getId() == null || !films.containsKey(film.getId())) {
-            throw new ValidationException("Фильм с указанным ID не найден");
-        }
         films.put(film.getId(), film);
         return film;
-    }
-
-    @Override
-    public Collection<Film> getAll() {
-        return films.values();
     }
 
     @Override

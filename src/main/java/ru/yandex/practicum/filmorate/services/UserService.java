@@ -7,12 +7,26 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserStorage userStorage;
+
+    public Collection<User> getAll() {
+        return userStorage.getAll();
+    }
+
+    public User create(User user) {
+        return userStorage.add(user);
+    }
+
+    public User update(User user) {
+        // Проверка на наличие пользователя
+        getUser(user.getId());
+
+        return userStorage.update(user);
+    }
 
     public void addFriend(Long userId, Long friendId) {
         User user = getUser(userId);

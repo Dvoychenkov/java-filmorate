@@ -6,16 +6,35 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserService userService;
+
+    public Collection<Film> getAll() {
+        return filmStorage.getAll();
+    }
+
+    public Film create(Film film) {
+        return filmStorage.add(film);
+    }
+
+    public Film update(Film film) {
+        if (film.getId() == null) {
+            throw new ValidationException("Для фильма не указан ID");
+        }
+        if (filmStorage.getById(film.getId()) == null) {
+            throw new ValidationException("Фильм с указанным ID не найден");
+        }
+
+        // Проверка на наличие фильма
+        getFilm(film.getId());
+
+        return filmStorage.update(film);
+    }
 
     public void addLike(Long filmId, Long userId) {
         // Проверка на наличие пользователя
