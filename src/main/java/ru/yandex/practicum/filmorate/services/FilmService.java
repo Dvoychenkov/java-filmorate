@@ -40,6 +40,9 @@ public class FilmService {
     }
 
     public void removeLike(Long filmId, Long userId) {
+        // Проверка на наличие пользователя
+        userService.getUser(userId);
+        
         Film film = getFilm(filmId);
         Set<Long> filmLikesUsersIds = film.getLikesUsersIds();
         filmLikesUsersIds.remove(userId);
