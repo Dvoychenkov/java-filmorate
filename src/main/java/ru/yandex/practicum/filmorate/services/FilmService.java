@@ -10,7 +10,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,11 +37,12 @@ public class FilmService {
             filmsLimit = 10;
         }
 
+        Comparator<Film> filmTopByLikesComparator = Comparator.comparingInt(Film::getLikesUsersIdsSize).reversed();
         return filmStorage.getAll().stream()
                 .filter(Objects::nonNull)
-                .sorted(Comparator.comparingInt(Film::getLikesUsersIdsSize).reversed())
+                .sorted(filmTopByLikesComparator)
                 .limit(filmsLimit)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public Film getFilm(Long id) {
@@ -56,5 +56,4 @@ public class FilmService {
         }
         return film;
     }
-
 }

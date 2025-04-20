@@ -41,7 +41,7 @@ public class UserService {
         return user.getFriendsIds().stream()
                 .map(userStorage::getById)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public List<User> getCommonFriends(Long userId, Long otherUserId) {
@@ -60,7 +60,7 @@ public class UserService {
         return commonIds.stream()
                 .map(userStorage::getById)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public User getUser(Long id) {
