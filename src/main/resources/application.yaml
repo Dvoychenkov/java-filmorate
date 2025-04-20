@@ -1,0 +1,14 @@
+logging:
+  file:
+    # Дублирование логирования в файл
+    name: ./logs/filmorate.log
+  level:
+    root: INFO
+    # Логирование HTTP-запросов
+    org.springframework.web: WARN
+    # Логирование системной информации при инициализации и запуске сервиса
+    org.springframework.boot: WARN
+    # Logbook (HTTP-запросы/ответы)
+    org.zalando.logbook: TRACE
+    # Все классы приложения Filmorate
+    ru.yandex.practicum.filmorate: TRACE
