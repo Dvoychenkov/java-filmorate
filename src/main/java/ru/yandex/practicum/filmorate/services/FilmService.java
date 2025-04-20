@@ -23,13 +23,6 @@ public class FilmService {
     }
 
     public Film update(Film film) {
-        if (film.getId() == null) {
-            throw new ValidationException("Для фильма не указан ID");
-        }
-        if (filmStorage.getById(film.getId()) == null) {
-            throw new ValidationException("Фильм с указанным ID не найден");
-        }
-
         // Проверка на наличие фильма
         getFilm(film.getId());
 
