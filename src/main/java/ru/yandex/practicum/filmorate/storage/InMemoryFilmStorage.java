@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -10,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-@Primary
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Long, Film> films = new HashMap<>();
@@ -18,7 +16,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getAll() {
-        log.debug("Получено {} фильмов", films.size());
+        log.info("Получено {} фильмов", films.size());
         return films.values();
     }
 
@@ -26,14 +24,14 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film add(Film film) {
         film.setId(idCounter++);
         films.put(film.getId(), film);
-        log.debug("Добавлен фильм с ID {}: {}. Всего фильмов: {}", film.getId(), film, films.size());
+        log.info("Добавлен фильм с ID {}: {}. Всего фильмов: {}", film.getId(), film, films.size());
         return film;
     }
 
     @Override
     public Film update(Film film) {
         films.put(film.getId(), film);
-        log.debug("Обновлён фильм с ID {}: {}", film.getId(), film);
+        log.info("Обновлён фильм с ID {}: {}", film.getId(), film);
         return film;
     }
 
@@ -41,9 +39,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film getById(Long id) {
         Film film = films.get(id);
         if (film == null) {
-            log.debug("Фильм с ID {} не найден", id);
+            log.info("Фильм с ID {} не найден", id);
         } else {
-            log.trace("Фильм с ID {} найден: {}", id, film);
+            log.info("Фильм с ID {} найден: {}", id, film);
         }
         return film;
     }

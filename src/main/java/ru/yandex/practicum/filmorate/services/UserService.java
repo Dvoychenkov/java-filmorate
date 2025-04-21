@@ -49,14 +49,14 @@ public class UserService {
         if (added) {
             log.info("[Взаимное добавление Пользователь => Друг] Пользователь {} добавил в друзья пользователя {}", userId, friendId);
         } else {
-            log.debug("[Взаимное добавление Пользователь => Друг] Пользователь {} уже был в друзьях у {}", friendId, userId);
+            log.info("[Взаимное добавление Пользователь => Друг] Пользователь {} уже был в друзьях у {}", friendId, userId);
         }
 
         boolean addedReverse = friendFriendsIds.add(userId);
         if (addedReverse) {
             log.info("[Взаимное добавление Друг => Пользователь] Пользователь {} добавил в друзья пользователя {}", userId, friendId);
         } else {
-            log.debug("[Взаимное добавление Друг => Пользователь] Пользователь {} уже был в друзьях у {}", friendId, userId);
+            log.info("[Взаимное добавление Друг => Пользователь] Пользователь {} уже был в друзьях у {}", friendId, userId);
         }
     }
 
@@ -72,14 +72,14 @@ public class UserService {
         if (removed) {
             log.info("[Взаимное удаление Пользователь => Друг] Пользователь {} удалил из друзей пользователя {}", userId, friendId);
         } else {
-            log.debug("[Взаимное удаление Пользователь => Друг] Пользователь {} не был в друзьях у {}", friendId, userId);
+            log.info("[Взаимное удаление Пользователь => Друг] Пользователь {} не был в друзьях у {}", friendId, userId);
         }
 
         boolean removedReverse = friendFriendsIds.remove(userId);
         if (removed) {
             log.info("[Взаимное удаление Друг => Пользователь] Пользователь {} удалил из друзей пользователя {}", userId, friendId);
         } else {
-            log.debug("[Взаимное удаление Друг => Пользователь] Пользователь {} не был в друзьях у {}", friendId, userId);
+            log.info("[Взаимное удаление Друг => Пользователь] Пользователь {} не был в друзьях у {}", friendId, userId);
         }
     }
 
@@ -99,8 +99,8 @@ public class UserService {
 
         Set<Long> userFriendsIds = user.getFriendsIds();
         Set<Long> otherUserFriendsIds = otherUser.getFriendsIds();
-        log.debug("Количество друзей пользователя {}: {}", userId, userFriendsIds.size());
-        log.debug("Количество друзей другого пользователя {}: {}", userId, otherUserFriendsIds.size());
+        log.info("Количество друзей пользователя {}: {}", userId, userFriendsIds.size());
+        log.info("Количество друзей другого пользователя {}: {}", userId, otherUserFriendsIds.size());
 
         Set<Long> commonIds = new HashSet<>(userFriendsIds);
         boolean hasCommon = commonIds.retainAll(otherUserFriendsIds);
@@ -126,7 +126,7 @@ public class UserService {
         if (user == null) {
             throw new NotFoundException("Пользователь с ID " + id + " не найден");
         }
-        log.trace("Получен пользователь по ID {}: {}", id, user);
+        log.info("Получен пользователь по ID {}: {}", id, user);
         return user;
     }
 }

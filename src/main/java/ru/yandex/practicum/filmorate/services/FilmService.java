@@ -51,7 +51,7 @@ public class FilmService {
         if (added) {
             log.info("Пользователь {} поставил лайк фильму {}", userId, filmId);
         } else {
-            log.debug("Пользователь {} уже ставил лайк фильму {}", userId, filmId);
+            log.info("Пользователь {} уже ставил лайк фильму {}", userId, filmId);
         }
     }
 
@@ -65,7 +65,7 @@ public class FilmService {
         if (removed) {
             log.info("Пользователь {} убрал лайк с фильма {}", userId, filmId);
         } else {
-            log.debug("Пользователь {} не ставил лайк фильму {}", userId, filmId);
+            log.info("Пользователь {} не ставил лайк фильму {}", userId, filmId);
         }
     }
 
@@ -82,7 +82,7 @@ public class FilmService {
                 .limit(filmsLimit)
                 .toList();
         log.info("Возвращён топ {} фильмов по лайкам", top.size());
-        log.debug("ID фильмов из топа: {}", top.stream().map(Film::getId).toList());
+        log.info("ID фильмов из топа: {}", top.stream().map(Film::getId).toList());
         return top;
     }
 
@@ -95,7 +95,7 @@ public class FilmService {
         if (film == null) {
             throw new NotFoundException("Фильм с ID " + id + " не найден");
         }
-        log.trace("Получен фильм по ID {}: {}", id, film);
+        log.info("Получен фильм по ID {}: {}", id, film);
         return film;
     }
 }

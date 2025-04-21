@@ -11,4 +11,4 @@ logging:
     # Logbook (HTTP-запросы/ответы)
     org.zalando.logbook: TRACE
     # Все классы приложения Filmorate
-    ru.yandex.practicum.filmorate: TRACE
+    ru.yandex.practicum.filmorate: INFO
