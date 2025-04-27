@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.FriendshipStatus;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -41,22 +42,22 @@ public class UserService {
         User user = getUser(userId);
         User friend = getUser(friendId);
 
-        Set<Long> userFriendsIds = user.getFriendsIds();
-        Set<Long> friendFriendsIds = friend.getFriendsIds();
+        Map<Long, FriendshipStatus> userFriends = user.getFriends();
+        Map<Long, FriendshipStatus> friendFriends = friend.getFriends();
 
         // При добавлении в друзья процесс происходит с обеих сторон автоматически
-        boolean added = userFriendsIds.add(friendId);
-        if (added) {
-            log.info("[Взаимное добавление Пользователь => Друг] Пользователь {} добавил в друзья пользователя {}", userId, friendId);
-        } else {
+        if (userFriends.containsKey(friendId)) {
             log.info("[Взаимное добавление Пользователь => Друг] Пользователь {} уже был в друзьях у {}", friendId, userId);
+        } else {
+            userFriends.put(friendId, FriendshipStatus.CONFIRMED);
+            log.info("[Взаимное добавление Пользователь => Друг] Пользователь {} добавил в друзья пользователя {}", userId, friendId);
         }
 
-        boolean addedReverse = friendFriendsIds.add(userId);
-        if (addedReverse) {
-            log.info("[Взаимное добавление Друг => Пользователь] Пользователь {} добавил в друзья пользователя {}", userId, friendId);
-        } else {
+        if (friendFriends.containsKey(userId)) {
             log.info("[Взаимное добавление Друг => Пользователь] Пользователь {} уже был в друзьях у {}", friendId, userId);
+        } else {
+            friendFriends.put(userId, FriendshipStatus.CONFIRMED);
+            log.info("[Взаимное добавление Друг => Пользователь] Пользователь {} добавил в друзья пользователя {}", userId, friendId);
         }
     }
 
@@ -64,19 +65,19 @@ public class UserService {
         User user = getUser(userId);
         User friend = getUser(friendId);
 
-        Set<Long> userFriendsIds = user.getFriendsIds();
-        Set<Long> friendFriendsIds = friend.getFriendsIds();
+        Map<Long, FriendshipStatus> userFriends = user.getFriends();
+        Map<Long, FriendshipStatus> friendFriends = friend.getFriends();
 
         // При удалении из друзей процесс происходит с обеих сторон автоматически
-        boolean removed = userFriendsIds.remove(friendId);
-        if (removed) {
+        if (userFriends.containsKey(friendId)) {
+            userFriends.remove(friendId);
             log.info("[Взаимное удаление Пользователь => Друг] Пользователь {} удалил из друзей пользователя {}", userId, friendId);
         } else {
             log.info("[Взаимное удаление Пользователь => Друг] Пользователь {} не был в друзьях у {}", friendId, userId);
         }
 
-        boolean removedReverse = friendFriendsIds.remove(userId);
-        if (removed) {
+        if (friendFriends.containsKey(userId)) {
+            friendFriends.remove(userId);
             log.info("[Взаимное удаление Друг => Пользователь] Пользователь {} удалил из друзей пользователя {}", userId, friendId);
         } else {
             log.info("[Взаимное удаление Друг => Пользователь] Пользователь {} не был в друзьях у {}", friendId, userId);
@@ -85,7 +86,7 @@ public class UserService {
 
     public Collection<User> getFriends(Long userId) {
         User user = getUser(userId);
-        Collection<User> friends = user.getFriendsIds().stream()
+        Collection<User> friends = user.getFriends().keySet().stream()
                 .map(userStorage::getById)
                 .filter(Objects::nonNull)
                 .toList();
@@ -97,8 +98,8 @@ public class UserService {
         User user = getUser(userId);
         User otherUser = getUser(otherUserId);
 
-        Set<Long> userFriendsIds = user.getFriendsIds();
-        Set<Long> otherUserFriendsIds = otherUser.getFriendsIds();
+        Set<Long> userFriendsIds = user.getFriends().keySet();
+        Set<Long> otherUserFriendsIds = otherUser.getFriends().keySet();
         log.info("Количество друзей пользователя {}: {}", userId, userFriendsIds.size());
         log.info("Количество друзей другого пользователя {}: {}", userId, otherUserFriendsIds.size());
 
