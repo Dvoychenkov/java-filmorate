@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.FriendshipStatus;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
 
@@ -38,6 +38,7 @@ public class UserService {
         return updated;
     }
 
+    // TODO убрать автоматический аппрув дружбы, доработать сохранение
     public void addFriend(Long userId, Long friendId) {
         User user = getUser(userId);
         User friend = getUser(friendId);
@@ -49,14 +50,15 @@ public class UserService {
         if (userFriends.containsKey(friendId)) {
             log.info("[Взаимное добавление Пользователь => Друг] Пользователь {} уже был в друзьях у {}", friendId, userId);
         } else {
-            userFriends.put(friendId, FriendshipStatus.CONFIRMED);
+
+            userFriends.put(friendId, null);
             log.info("[Взаимное добавление Пользователь => Друг] Пользователь {} добавил в друзья пользователя {}", userId, friendId);
         }
 
         if (friendFriends.containsKey(userId)) {
             log.info("[Взаимное добавление Друг => Пользователь] Пользователь {} уже был в друзьях у {}", friendId, userId);
         } else {
-            friendFriends.put(userId, FriendshipStatus.CONFIRMED);
+            friendFriends.put(userId, null);
             log.info("[Взаимное добавление Друг => Пользователь] Пользователь {} добавил в друзья пользователя {}", userId, friendId);
         }
     }
@@ -118,6 +120,7 @@ public class UserService {
         return commonFriends;
     }
 
+    // TODO возвращать Optional
     public User getUser(Long id) {
         if (id == null) {
             throw new ValidationException("Некорректный ID пользователя");

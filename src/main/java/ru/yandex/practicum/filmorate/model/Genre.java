@@ -1,10 +1,15 @@
 package ru.yandex.practicum.filmorate.model;
 
-public enum Genre {
-    COMEDY,
-    DRAMA,
-    ANIMATION,
-    THRILLER,
-    DOCUMENTARY,
-    ACTION
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Genre {
+    private Long id;
+    private String code;
+    private String name;
+    private String description;
 }
