@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -48,6 +48,7 @@ public class InMemoryUserStorage implements UserStorage {
         return user;
     }
 
+    // TODO - по хорошему перенести нормалайзер на уровень сервиса в рамках DTO сущности - UserMapper.mapToUser(request)
     private void normalizeUser(User user) {
         if (user.getName() == null || user.getName().isBlank()) {
             log.info("Имя пользователя пустое. Устанавливаем login '{}' в качестве имени", user.getLogin());
