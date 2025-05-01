@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -12,6 +11,8 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.Set;
+
+import static ru.yandex.practicum.filmorate.validation.ValidationUtils.requireFound;
 
 @Service
 @RequiredArgsConstructor
@@ -33,8 +34,7 @@ public class FilmService {
     }
 
     public Film update(Film film) {
-        // Проверка на наличие фильма
-        getFilm(film.getId());
+        getFilm(film.getId()); // Проверка на наличие фильма
 
         Film updated = filmStorage.update(film);
         log.info("Обновлён фильм: {}", updated);
@@ -42,8 +42,7 @@ public class FilmService {
     }
 
     public void addLike(Long filmId, Long userId) {
-        // Проверка на наличие пользователя
-        userService.getUser(userId);
+        userService.getUser(userId); // Проверка на наличие пользователя
 
         Film film = getFilm(filmId);
         Set<Long> filmLikesUsersIds = film.getLikesUsersIds();
@@ -56,8 +55,7 @@ public class FilmService {
     }
 
     public void removeLike(Long filmId, Long userId) {
-        // Проверка на наличие пользователя
-        userService.getUser(userId);
+        userService.getUser(userId); // Проверка на наличие пользователя
 
         Film film = getFilm(filmId);
         Set<Long> filmLikesUsersIds = film.getLikesUsersIds();
@@ -87,14 +85,8 @@ public class FilmService {
     }
 
     public Film getFilm(Long id) {
-        if (id == null) {
-            throw new ValidationException("Некорректный ID фильма");
-        }
-
-        Film film = filmStorage.getById(id);
-        if (film == null) {
-            throw new NotFoundException("Фильм с ID " + id + " не найден");
-        }
+        if (id == null) throw new ValidationException("Некорректный ID фильма");
+        Film film = requireFound(filmStorage.getById(id), () -> "Фильм с ID " + id + " не найден");
         log.info("Получен фильм по ID {}: {}", id, film);
         return film;
     }

@@ -3,13 +3,14 @@ package ru.yandex.practicum.filmorate.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.FriendshipStatus;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
+
+import static ru.yandex.practicum.filmorate.validation.ValidationUtils.requireFound;
 
 @Service
 @RequiredArgsConstructor
@@ -30,8 +31,7 @@ public class UserService {
     }
 
     public User update(User user) {
-        // Проверка на наличие пользователя
-        getUser(user.getId());
+        getUser(user.getId()); // Проверка на наличие пользователя
 
         User updated = userStorage.update(user);
         log.info("Обновлён пользователь: {}", updated);
@@ -89,7 +89,7 @@ public class UserService {
     public Collection<User> getFriends(Long userId) {
         User user = getUser(userId);
         Collection<User> friends = user.getFriends().keySet().stream()
-                .map(userStorage::getById)
+                .map(friendId -> userStorage.getById(friendId).orElse(null))
                 .filter(Objects::nonNull)
                 .toList();
         log.info("У пользователя {} найдено {} друзей", userId, friends.size());
@@ -113,23 +113,16 @@ public class UserService {
         }
 
         Collection<User> commonFriends = commonIds.stream()
-                .map(userStorage::getById)
+                .map(commonFriendId -> userStorage.getById(commonFriendId).orElse(null))
                 .filter(Objects::nonNull)
                 .toList();
         log.info("Количество общих друзей для пользователей {} и {}: {}", userId, otherUserId, commonFriends.size());
         return commonFriends;
     }
 
-    // TODO возвращать Optional
     public User getUser(Long id) {
-        if (id == null) {
-            throw new ValidationException("Некорректный ID пользователя");
-        }
-
-        User user = userStorage.getById(id);
-        if (user == null) {
-            throw new NotFoundException("Пользователь с ID " + id + " не найден");
-        }
+        if (id == null) throw new ValidationException("Некорректный ID пользователя");
+        User user = requireFound(userStorage.getById(id), () -> "Пользователь с ID " + id + " не найден");
         log.info("Получен пользователь по ID {}: {}", id, user);
         return user;
     }

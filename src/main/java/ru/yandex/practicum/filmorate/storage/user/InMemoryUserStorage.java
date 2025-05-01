@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 @Slf4j
@@ -38,14 +39,13 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getById(Long id) {
-        User user = users.get(id);
-        if (user == null) {
-            log.info("Пользователь с ID {} не найден", id);
-        } else {
-            log.info("Пользователь с ID {} найден: {}", id, user);
-        }
-        return user;
+    public Optional<User> getById(Long id) {
+        Optional<User> optUser = Optional.ofNullable(users.get(id));
+        optUser.ifPresentOrElse(
+                (user) -> log.info("Пользователь с ID {} найден: {}", id, user),
+                () -> log.info("Пользователь с ID {} не найден", id)
+        );
+        return optUser;
     }
 
     // TODO - по хорошему перенести нормалайзер на уровень сервиса в рамках DTO сущности - UserMapper.mapToUser(request)

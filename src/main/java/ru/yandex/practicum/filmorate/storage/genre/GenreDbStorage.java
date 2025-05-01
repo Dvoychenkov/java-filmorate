@@ -34,11 +34,10 @@ public class GenreDbStorage extends BaseReadRepository<Genre> implements GenreSt
     @Override
     public Optional<Genre> getById(Long id) {
         Optional<Genre> optGenre = queryOne(SQL_SELECT_BY_ID, id);
-        if (optGenre.isEmpty()) {
-            log.info("Жанр с ID {} в БД не найден", id);
-        } else {
-            log.info("Жанр с ID {} в БД найден: {}", id, optGenre.get());
-        }
+        optGenre.ifPresentOrElse(
+                (genre) -> log.info("Жанр с ID {} в БД найден: {}", id, genre),
+                () -> log.info("Жанр с ID {} в БД не найден", id)
+        );
         return optGenre;
     }
 

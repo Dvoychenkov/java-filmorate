@@ -29,11 +29,10 @@ public class MpaRatingDbStorage extends BaseReadRepository<MpaRating> implements
     @Override
     public Optional<MpaRating> getById(Long id) {
         Optional<MpaRating> optMpaRating = queryOne(SQL_SELECT_BY_ID, id);
-        if (optMpaRating.isEmpty()) {
-            log.info("МПА рейтинг с ID {} в БД не найден", id);
-        } else {
-            log.info("МПА рейтинг с ID {} в БД найден: {}", id, optMpaRating.get());
-        }
+        optMpaRating.ifPresentOrElse(
+                (mpaRating) -> log.info("МПА рейтинг с ID {} в БД найден: {}", id, mpaRating),
+                () -> log.info("МПА рейтинг с ID {} в БД не найден", id)
+        );
         return optMpaRating;
     }
 }

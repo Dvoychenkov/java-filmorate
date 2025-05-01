@@ -4,11 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.base.BaseCRUDRepository;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @Slf4j
 @Repository
@@ -51,9 +51,6 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
 
     @Override
     public Film update(Film film) {
-        // TODO до-определиться, нужна ли тут проверка + по аналогии для юзеров
-        getById(film.getId());
-
         update(SQL_UPDATE,
                 film.getName(),
                 film.getDescription(),
@@ -66,10 +63,13 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
         return film;
     }
 
-    // TODO убрать выброс исключения, возвращать Optional
     @Override
-    public Film getById(Long id) {
-        return queryOne(SQL_SELECT_BY_ID, id)
-                .orElseThrow(() -> new NotFoundException("Фильм с ID " + id + " не найден"));
+    public Optional<Film> getById(Long id) {
+        Optional<Film> optFilm = queryOne(SQL_SELECT_BY_ID, id);
+        optFilm.ifPresentOrElse(
+                (film) -> log.info("Фильм с ID {} в БД найден: {}", id, film),
+                () -> log.info("Фильм с ID {} в БД не найден", id)
+        );
+        return optFilm;
     }
 }

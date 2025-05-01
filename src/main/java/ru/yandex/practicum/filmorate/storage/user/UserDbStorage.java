@@ -64,15 +64,12 @@ public class UserDbStorage extends BaseCRUDRepository<User> implements UserStora
     }
 
     @Override
-    public User getById(Long id) {
+    public Optional<User> getById(Long id) {
         Optional<User> optUser = queryOne(SQL_SELECT_BY_ID, id);
-        if (optUser.isEmpty()) {
-            log.info("Пользователь с ID {} в БД не найден", id);
-            return null;
-        } else {
-            User user = optUser.get();
-            log.info("Пользователь с ID {} в БД найден: {}", id, user);
-            return user;
-        }
+        optUser.ifPresentOrElse(
+                (user) -> log.info("Пользователь с ID {} в БД найден: {}", id, user),
+                () -> log.info("Пользователь с ID {} в БД не найден", id)
+        );
+        return optUser;
     }
 }
