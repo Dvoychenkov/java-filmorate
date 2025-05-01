@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.model.enums.FriendshipRemoveResult;
 import ru.yandex.practicum.filmorate.storage.base.BaseCRUDRepository;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -206,8 +205,6 @@ public class UserDbStorage extends BaseCRUDRepository<User> implements UserStora
         Collection<User> commonFriends = queryMany(SQL_SELECT_COMMON_FRIENDS, userId, otherUserId);
         log.info("Получено {} общих друзей для юзеров {} и {} из БД", commonFriends.size(), userId, otherUserId);
         return commonFriends;
-
-        return jdbcTemplate.query(SQL_SELECT_COMMON_FRIENDS, userRowMapper, userId, otherUserId);
     }
 
     private int getStatusIdByCode(String code) {

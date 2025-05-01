@@ -3,7 +3,11 @@ package ru.yandex.practicum.filmorate.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dto.FilmDto;
+import ru.yandex.practicum.filmorate.dto.NewFilmRequest;
+import ru.yandex.practicum.filmorate.dto.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
@@ -17,31 +21,35 @@ import static ru.yandex.practicum.filmorate.validation.ValidationUtils.requireFo
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserService userService;
+    private final FilmMapper filmMapper;
 
-    public Collection<Film> getAll() {
+    public Collection<FilmDto> getAll() {
         Collection<Film> films = filmStorage.getAll();
         log.info("Получено {} фильмов", films.size());
-        return films;
+        return films.stream()
+                .map(filmMapper::mapToFilmDto)
+                .toList();
     }
 
-    public Film create(Film film) {
-        Film created = filmStorage.add(film);
-        if (created == null) throw new IllegalStateException("Не удалось сохранить данные для нового фильма");
-        log.info("Создан фильм: {}", created);
-        return created;
+    public FilmDto create(NewFilmRequest newRequestFilm) {
+        Film filmToCreate = filmMapper.mapToFilm(newRequestFilm);
+        Film createdFilm = filmStorage.add(filmToCreate);
+        if (createdFilm == null) throw new IllegalStateException("Не удалось сохранить данные для нового фильма");
+        log.info("Создан фильм: {}", createdFilm);
+        return filmMapper.mapToFilmDto(createdFilm);
     }
 
-    public Film update(Film film) {
-        getFilm(film.getId()); // Проверка на наличие фильма
-
-        Film updated = filmStorage.update(film);
-        log.info("Обновлён фильм: {}", updated);
-        return updated;
+    public FilmDto update(UpdateFilmRequest updateRequestFilm) {
+        Film filmToUpdate = getFilmOrThrow(updateRequestFilm.getId());
+        filmMapper.updateFilmFromRequest(filmToUpdate, updateRequestFilm);
+        Film updatedFilm = filmStorage.update(filmToUpdate);
+        log.info("Обновлён фильм: {}", updatedFilm);
+        return filmMapper.mapToFilmDto(updatedFilm);
     }
 
     public void addLike(Long filmId, Long userId) {
-        userService.getUser(userId); // Проверка на наличие пользователя
-        Film film = getFilm(filmId); // Проверка на наличие фильма
+        getFilmOrThrow(filmId); // Проверка на наличие фильма
+        userService.getUserOrThrow(userId); // Проверка на наличие пользователя
 
         boolean added = filmStorage.addLike(filmId, userId);
         if (added) {
@@ -52,8 +60,8 @@ public class FilmService {
     }
 
     public void removeLike(Long filmId, Long userId) {
-        userService.getUser(userId); // Проверка на наличие пользователя
-        Film film = getFilm(filmId); // Проверка на наличие фильма
+        getFilmOrThrow(filmId); // Проверка на наличие фильма
+        userService.getUserOrThrow(userId); // Проверка на наличие пользователя
 
         boolean removed = filmStorage.removeLike(filmId, userId);
         if (removed) {
@@ -63,7 +71,7 @@ public class FilmService {
         }
     }
 
-    public Collection<Film> getTopFilmsByLikes(int filmsLimit) {
+    public Collection<FilmDto> getTopFilmsByLikes(int filmsLimit) {
         if (filmsLimit <= 0) {
             log.warn("Передан некорректный параметр count = {}, используется значение по умолчанию", filmsLimit);
             filmsLimit = 10;
@@ -72,13 +80,20 @@ public class FilmService {
         Collection<Film> top = filmStorage.getTopFilmsByLikes(filmsLimit);
         log.info("Возвращён топ {} фильмов по лайкам", top.size());
         log.info("ID фильмов из топа: {}", top.stream().map(Film::getId).toList());
-        return top;
+        return top.stream()
+                .map(filmMapper::mapToFilmDto)
+                .toList();
     }
 
-    public Film getFilm(Long id) {
+    public FilmDto getFilm(Long id) {
+        return filmMapper.mapToFilmDto(getFilmOrThrow(id));
+    }
+
+    public Film getFilmOrThrow(Long id) {
         if (id == null) throw new ValidationException("Некорректный ID фильма");
         Film film = requireFound(filmStorage.getById(id), () -> "Фильм с ID " + id + " не найден");
         log.info("Получен фильм по ID {}: {}", id, film);
         return film;
     }
+
 }

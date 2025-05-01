@@ -24,7 +24,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User add(User user) {
-        normalizeUser(user);
         user.setId(idCounter++);
         users.put(user.getId(), user);
         log.info("Добавлен пользователь с ID {}: {}. Всего пользователей: {}", user.getId(), user, users.size());
@@ -33,7 +32,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User update(User user) {
-        normalizeUser(user);
         users.put(user.getId(), user);
         log.info("Обновлён пользователь с ID {}: {}", user.getId(), user);
         return user;
@@ -168,13 +166,5 @@ public class InMemoryUserStorage implements UserStorage {
                 .map(commonFriendId -> getById(commonFriendId).orElse(null))
                 .filter(Objects::nonNull)
                 .toList();
-    }
-
-    // TODO - по хорошему перенести нормалайзер на уровень сервиса в рамках DTO сущности - UserMapper.mapToUser(request)
-    private void normalizeUser(User user) {
-        if (user.getName() == null || user.getName().isBlank()) {
-            log.info("Имя пользователя пустое. Устанавливаем login '{}' в качестве имени", user.getLogin());
-            user.setName(user.getLogin());
-        }
     }
 }

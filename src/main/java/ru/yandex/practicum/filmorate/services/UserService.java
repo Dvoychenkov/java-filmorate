@@ -3,13 +3,17 @@ package ru.yandex.practicum.filmorate.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dto.NewUserRequest;
+import ru.yandex.practicum.filmorate.dto.UpdateUserRequest;
+import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.enums.FriendshipAddResult;
 import ru.yandex.practicum.filmorate.model.enums.FriendshipRemoveResult;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.*;
+import java.util.Collection;
 
 import static ru.yandex.practicum.filmorate.validation.ValidationUtils.requireFound;
 
@@ -18,31 +22,35 @@ import static ru.yandex.practicum.filmorate.validation.ValidationUtils.requireFo
 @Slf4j
 public class UserService {
     private final UserStorage userStorage;
+    private final UserMapper userMapper;
 
-    public Collection<User> getAll() {
+    public Collection<UserDto> getAll() {
         Collection<User> users = userStorage.getAll();
         log.info("Получено {} пользователей", users.size());
-        return users;
+        return users.stream()
+                .map(userMapper::mapToUserDto)
+                .toList();
     }
 
-    public User create(User user) {
-        User created = userStorage.add(user);
-        if (created == null) throw new IllegalStateException("Не удалось сохранить данные для нового пользователя");
-        log.info("Создан пользователь: {}", created);
-        return created;
+    public UserDto create(NewUserRequest newRequestUser) {
+        User userToCreate = userMapper.mapToUser(newRequestUser);
+        User createdUser = userStorage.add(userToCreate);
+        if (createdUser == null) throw new IllegalStateException("Не удалось сохранить данные для нового пользователя");
+        log.info("Создан пользователь: {}", createdUser);
+        return userMapper.mapToUserDto(createdUser);
     }
 
-    public User update(User user) {
-        getUser(user.getId()); // Проверка на наличие пользователя
-
-        User updated = userStorage.update(user);
-        log.info("Обновлён пользователь: {}", updated);
-        return updated;
+    public UserDto update(UpdateUserRequest updateRequestUser) {
+        User userToUpdate = getUserOrThrow(updateRequestUser.getId());
+        userMapper.updateUserFromRequest(userToUpdate, updateRequestUser);
+        User updatedUser = userStorage.update(userToUpdate);
+        log.info("Обновлён пользователь: {}", updatedUser);
+        return userMapper.mapToUserDto(updatedUser);
     }
 
     public void addFriend(Long userId, Long friendId) {
-        User user = getUser(userId); // Проверка на наличие пользователя
-        User friend = getUser(friendId); // Проверка на наличие друга
+        getUserOrThrow(userId); // Проверка на наличие пользователя
+        getUserOrThrow(friendId); // Проверка на наличие друга
 
         FriendshipAddResult friendshipAddResult = userStorage.addFriend(userId, friendId);
         switch (friendshipAddResult) {
@@ -55,8 +63,8 @@ public class UserService {
     }
 
     public void removeFriend(Long userId, Long friendId) {
-        User user = getUser(userId); // Проверка на наличие пользователя
-        User friend = getUser(friendId); // Проверка на наличие друга
+        getUserOrThrow(userId); // Проверка на наличие пользователя
+        getUserOrThrow(friendId); // Проверка на наличие друга
 
         FriendshipRemoveResult friendshipRemoveResult = userStorage.removeFriend(userId, friendId);
         switch (friendshipRemoveResult) {
@@ -67,17 +75,19 @@ public class UserService {
         }
     }
 
-    public Collection<User> getFriends(Long userId) {
-        User user = getUser(userId); // Проверка на наличие пользователя
+    public Collection<UserDto> getFriends(Long userId) {
+        getUserOrThrow(userId); // Проверка на наличие пользователя
 
         Collection<User> friends = userStorage.getFriends(userId);
         log.info("У пользователя {} найдено {} друзей", userId, friends.size());
-        return friends;
+        return friends.stream()
+                .map(userMapper::mapToUserDto)
+                .toList();
     }
 
-    public Collection<User> getCommonFriends(Long userId, Long otherUserId) {
-        User user = getUser(userId); // Проверка на наличие пользователя
-        User otherUser = getUser(otherUserId); // Проверка на наличие другого пользователя
+    public Collection<UserDto> getCommonFriends(Long userId, Long otherUserId) {
+        getUserOrThrow(userId); // Проверка на наличие пользователя
+        getUserOrThrow(otherUserId); // Проверка на наличие другого пользователя
 
         Collection<User> commonFriends = userStorage.getCommonFriends(userId, otherUserId);
         if (commonFriends.isEmpty()) {
@@ -85,10 +95,16 @@ public class UserService {
         } else {
             log.info("Количество общих друзей для пользователей {} и {}: {}", userId, otherUserId, commonFriends.size());
         }
-        return commonFriends;
+        return commonFriends.stream()
+                .map(userMapper::mapToUserDto)
+                .toList();
     }
 
-    public User getUser(Long id) {
+    public UserDto getUser(Long id) {
+        return userMapper.mapToUserDto(getUserOrThrow(id));
+    }
+
+    public User getUserOrThrow(Long id) {
         if (id == null) throw new ValidationException("Некорректный ID пользователя");
         User user = requireFound(userStorage.getById(id), () -> "Пользователь с ID " + id + " не найден");
         log.info("Получен пользователь по ID {}: {}", id, user);

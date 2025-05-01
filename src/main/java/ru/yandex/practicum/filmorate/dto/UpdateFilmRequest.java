@@ -1,20 +1,15 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.validation.ReleaseDateValid;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Data
-public class Film {
+public class UpdateFilmRequest {
+    @NotNull(message = "ID фильма обязателен для обновления")
     private Long id;
 
     @NotBlank(message = "Пустое название фильма")
@@ -33,13 +28,7 @@ public class Film {
     private Integer duration;
 
     @NotNull(message = "Не указан рейтинг MPA")
-    private MpaRating mpaRating;
+    private Long mpaRatingId;
 
-    private Set<Long> likesUsersIds = new HashSet<>();
-
-    private List<Genre> genres = new ArrayList<>();
-
-    public int getLikesUsersIdsSize() {
-        return likesUsersIds.size();
-    }
+    private List<Long> genreIds;
 }
