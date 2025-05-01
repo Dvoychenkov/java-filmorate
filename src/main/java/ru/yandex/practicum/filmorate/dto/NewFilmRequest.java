@@ -27,5 +27,5 @@ public class NewFilmRequest {
     @NotNull(message = "Не указан рейтинг MPA")
     private Long mpaRatingId;
 
-    private List<Long> genreIds;
+    private List<Long> genresIds;
 }

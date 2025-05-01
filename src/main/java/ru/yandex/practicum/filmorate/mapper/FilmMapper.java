@@ -29,7 +29,7 @@ public class FilmMapper {
         film.setReleaseDate(request.getReleaseDate());
         film.setDuration(request.getDuration());
         film.setMpaRating(resolveMpaRating(request.getMpaRatingId()));
-        film.setGenres(resolveGenres(request.getGenreIds()));
+        film.setGenres(resolveGenres(request.getGenresIds()));
         return film;
     }
 
@@ -39,7 +39,7 @@ public class FilmMapper {
         film.setReleaseDate(request.getReleaseDate());
         film.setDuration(request.getDuration());
         film.setMpaRating(resolveMpaRating(request.getMpaRatingId()));
-        film.setGenres(resolveGenres(request.getGenreIds()));
+        film.setGenres(resolveGenres(request.getGenresIds()));
     }
 
     public FilmDto mapToFilmDto(Film film) {
