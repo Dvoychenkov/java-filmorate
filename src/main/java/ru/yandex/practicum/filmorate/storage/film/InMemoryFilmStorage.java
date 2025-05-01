@@ -4,10 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -44,5 +41,35 @@ public class InMemoryFilmStorage implements FilmStorage {
                 () -> log.info("Фильм с ID {} не найден", id)
         );
         return optFilm;
+    }
+
+    @Override
+    public boolean addLike(Long filmId, Long userId) {
+        Optional<Film> optFilm = getById(filmId);
+        if (optFilm.isEmpty()) return false;
+
+        Film film = optFilm.get();
+        Set<Long> filmLikesUsersIds = film.getLikesUsersIds();
+        return filmLikesUsersIds.add(userId);
+    }
+
+    @Override
+    public boolean removeLike(Long filmId, Long userId) {
+        Optional<Film> optFilm = getById(filmId);
+        if (optFilm.isEmpty()) return false;
+
+        Film film = optFilm.get();
+        Set<Long> filmLikesUsersIds = film.getLikesUsersIds();
+        return filmLikesUsersIds.remove(userId);
+    }
+
+    @Override
+    public Collection<Film> getTopFilmsByLikes(int count) {
+        Comparator<Film> filmTopByLikesComparator = Comparator.comparingInt(Film::getLikesUsersIdsSize).reversed();
+        return getAll().stream()
+                .filter(Objects::nonNull)
+                .sorted(filmTopByLikesComparator)
+                .limit(count)
+                .toList();
     }
 }

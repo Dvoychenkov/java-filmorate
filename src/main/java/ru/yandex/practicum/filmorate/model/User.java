@@ -25,5 +25,5 @@ public class User {
     @PastOrPresent(message = "Дата рождения пользователя больше текущей даты")
     private LocalDate birthday;
 
-    private final Map<Long, FriendshipStatus> friends = new HashMap<>();
+    private Map<Long, FriendshipStatus> friends = new HashMap<>();
 }

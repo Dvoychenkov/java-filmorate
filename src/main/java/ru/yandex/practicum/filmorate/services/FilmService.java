@@ -8,9 +8,6 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.Objects;
-import java.util.Set;
 
 import static ru.yandex.practicum.filmorate.validation.ValidationUtils.requireFound;
 
@@ -29,6 +26,7 @@ public class FilmService {
 
     public Film create(Film film) {
         Film created = filmStorage.add(film);
+        if (created == null) throw new IllegalStateException("Не удалось сохранить данные для нового фильма");
         log.info("Создан фильм: {}", created);
         return created;
     }
@@ -43,10 +41,9 @@ public class FilmService {
 
     public void addLike(Long filmId, Long userId) {
         userService.getUser(userId); // Проверка на наличие пользователя
+        Film film = getFilm(filmId); // Проверка на наличие фильма
 
-        Film film = getFilm(filmId);
-        Set<Long> filmLikesUsersIds = film.getLikesUsersIds();
-        boolean added = filmLikesUsersIds.add(userId);
+        boolean added = filmStorage.addLike(filmId, userId);
         if (added) {
             log.info("Пользователь {} поставил лайк фильму {}", userId, filmId);
         } else {
@@ -56,10 +53,9 @@ public class FilmService {
 
     public void removeLike(Long filmId, Long userId) {
         userService.getUser(userId); // Проверка на наличие пользователя
+        Film film = getFilm(filmId); // Проверка на наличие фильма
 
-        Film film = getFilm(filmId);
-        Set<Long> filmLikesUsersIds = film.getLikesUsersIds();
-        boolean removed = filmLikesUsersIds.remove(userId);
+        boolean removed = filmStorage.removeLike(filmId, userId);
         if (removed) {
             log.info("Пользователь {} убрал лайк с фильма {}", userId, filmId);
         } else {
@@ -73,12 +69,7 @@ public class FilmService {
             filmsLimit = 10;
         }
 
-        Comparator<Film> filmTopByLikesComparator = Comparator.comparingInt(Film::getLikesUsersIdsSize).reversed();
-        Collection<Film> top = filmStorage.getAll().stream()
-                .filter(Objects::nonNull)
-                .sorted(filmTopByLikesComparator)
-                .limit(filmsLimit)
-                .toList();
+        Collection<Film> top = filmStorage.getTopFilmsByLikes(filmsLimit);
         log.info("Возвращён топ {} фильмов по лайкам", top.size());
         log.info("ID фильмов из топа: {}", top.stream().map(Film::getId).toList());
         return top;

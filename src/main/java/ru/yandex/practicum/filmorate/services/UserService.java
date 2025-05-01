@@ -4,8 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.FriendshipStatus;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.enums.FriendshipAddResult;
+import ru.yandex.practicum.filmorate.model.enums.FriendshipRemoveResult;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
@@ -26,6 +27,7 @@ public class UserService {
 
     public User create(User user) {
         User created = userStorage.add(user);
+        if (created == null) throw new IllegalStateException("Не удалось сохранить данные для нового пользователя");
         log.info("Создан пользователь: {}", created);
         return created;
     }
@@ -38,85 +40,51 @@ public class UserService {
         return updated;
     }
 
-    // TODO убрать автоматический аппрув дружбы, доработать сохранение
     public void addFriend(Long userId, Long friendId) {
-        User user = getUser(userId);
-        User friend = getUser(friendId);
+        User user = getUser(userId); // Проверка на наличие пользователя
+        User friend = getUser(friendId); // Проверка на наличие друга
 
-        Map<Long, FriendshipStatus> userFriends = user.getFriends();
-        Map<Long, FriendshipStatus> friendFriends = friend.getFriends();
-
-        // При добавлении в друзья процесс происходит с обеих сторон автоматически
-        if (userFriends.containsKey(friendId)) {
-            log.info("[Взаимное добавление Пользователь => Друг] Пользователь {} уже был в друзьях у {}", friendId, userId);
-        } else {
-
-            userFriends.put(friendId, null);
-            log.info("[Взаимное добавление Пользователь => Друг] Пользователь {} добавил в друзья пользователя {}", userId, friendId);
-        }
-
-        if (friendFriends.containsKey(userId)) {
-            log.info("[Взаимное добавление Друг => Пользователь] Пользователь {} уже был в друзьях у {}", friendId, userId);
-        } else {
-            friendFriends.put(userId, null);
-            log.info("[Взаимное добавление Друг => Пользователь] Пользователь {} добавил в друзья пользователя {}", userId, friendId);
+        FriendshipAddResult friendshipAddResult = userStorage.addFriend(userId, friendId);
+        switch (friendshipAddResult) {
+            case FRIEND_REQUEST_ADDED -> log.info("Отправлена новая заявка в друзья от {} к {}", userId, friendId);
+            case FRIEND_REQUEST_ALREADY_EXISTS -> log.info("Заявка в друзья уже была от {} к {}", userId, friendId);
+            case FRIENDSHIP_CONFIRMED -> log.info("Дружба подтверждена между {} и {}", userId, friendId);
+            case FRIENDSHIP_ALREADY_EXISTS -> log.info("Дружба уже существует между {} и {}", userId, friendId);
+            case UNKNOWN -> log.info("Неизвестное состояние создания дружбы между {} и {}", userId, friendId);
         }
     }
 
     public void removeFriend(Long userId, Long friendId) {
-        User user = getUser(userId);
-        User friend = getUser(friendId);
+        User user = getUser(userId); // Проверка на наличие пользователя
+        User friend = getUser(friendId); // Проверка на наличие друга
 
-        Map<Long, FriendshipStatus> userFriends = user.getFriends();
-        Map<Long, FriendshipStatus> friendFriends = friend.getFriends();
-
-        // При удалении из друзей процесс происходит с обеих сторон автоматически
-        if (userFriends.containsKey(friendId)) {
-            userFriends.remove(friendId);
-            log.info("[Взаимное удаление Пользователь => Друг] Пользователь {} удалил из друзей пользователя {}", userId, friendId);
-        } else {
-            log.info("[Взаимное удаление Пользователь => Друг] Пользователь {} не был в друзьях у {}", friendId, userId);
-        }
-
-        if (friendFriends.containsKey(userId)) {
-            friendFriends.remove(userId);
-            log.info("[Взаимное удаление Друг => Пользователь] Пользователь {} удалил из друзей пользователя {}", userId, friendId);
-        } else {
-            log.info("[Взаимное удаление Друг => Пользователь] Пользователь {} не был в друзьях у {}", friendId, userId);
+        FriendshipRemoveResult friendshipRemoveResult = userStorage.removeFriend(userId, friendId);
+        switch (friendshipRemoveResult) {
+            case CONFIRMED_FRIENDSHIP_REMOVED -> log.info("Дружба отменена от {} к {}", userId, friendId);
+            case FRIEND_REQUEST_REMOVED -> log.info("Заявка отменена от {} к {}", userId, friendId);
+            case NO_FRIENDSHIP -> log.info("Дружбы/заявки не было от {} к {}", userId, friendId);
+            case UNKNOWN -> log.info("Неизвестное состояние разрыва дружбы между {} и {}", userId, friendId);
         }
     }
 
     public Collection<User> getFriends(Long userId) {
-        User user = getUser(userId);
-        Collection<User> friends = user.getFriends().keySet().stream()
-                .map(friendId -> userStorage.getById(friendId).orElse(null))
-                .filter(Objects::nonNull)
-                .toList();
+        User user = getUser(userId); // Проверка на наличие пользователя
+
+        Collection<User> friends = userStorage.getFriends(userId);
         log.info("У пользователя {} найдено {} друзей", userId, friends.size());
         return friends;
     }
 
     public Collection<User> getCommonFriends(Long userId, Long otherUserId) {
-        User user = getUser(userId);
-        User otherUser = getUser(otherUserId);
+        User user = getUser(userId); // Проверка на наличие пользователя
+        User otherUser = getUser(otherUserId); // Проверка на наличие другого пользователя
 
-        Set<Long> userFriendsIds = user.getFriends().keySet();
-        Set<Long> otherUserFriendsIds = otherUser.getFriends().keySet();
-        log.info("Количество друзей пользователя {}: {}", userId, userFriendsIds.size());
-        log.info("Количество друзей другого пользователя {}: {}", userId, otherUserFriendsIds.size());
-
-        Set<Long> commonIds = new HashSet<>(userFriendsIds);
-        boolean hasCommon = commonIds.retainAll(otherUserFriendsIds);
-        if (!hasCommon) {
+        Collection<User> commonFriends = userStorage.getCommonFriends(userId, otherUserId);
+        if (commonFriends.isEmpty()) {
             log.info("У пользователей нет общих друзей: {} и {}", userId, otherUserId);
-            return new ArrayList<>();
+        } else {
+            log.info("Количество общих друзей для пользователей {} и {}: {}", userId, otherUserId, commonFriends.size());
         }
-
-        Collection<User> commonFriends = commonIds.stream()
-                .map(commonFriendId -> userStorage.getById(commonFriendId).orElse(null))
-                .filter(Objects::nonNull)
-                .toList();
-        log.info("Количество общих друзей для пользователей {} и {}: {}", userId, otherUserId, commonFriends.size());
         return commonFriends;
     }
 
