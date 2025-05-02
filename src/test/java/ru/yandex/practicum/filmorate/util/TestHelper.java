@@ -6,12 +6,13 @@ import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class TestHelper {
+    public static final String NOT_FOUND_USER = "Юзер не найден";
+    public static final String NOT_FOUND_MPA = "МПА рейтинг не найден";
+    public static final String NOT_FOUND_GENRE = "Жанр не найден";
+
     public static User createUser(Long index) {
         int id = index.intValue();
         return new User(
@@ -41,4 +42,10 @@ public class TestHelper {
     public static Film createFilm(Long index, MpaRating mpaRating) {
         return createFilm(index, mpaRating, List.of());
     }
+
+    public static <T> T getRequired(Optional<T> optional, String message) {
+        String assertMessage = message == null ? "Объект не найден" : message;
+        return optional.orElseThrow(() -> new AssertionError(assertMessage));
+    }
+
 }

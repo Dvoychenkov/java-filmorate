@@ -27,8 +27,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static ru.yandex.practicum.filmorate.util.TestHelper.createFilm;
-import static ru.yandex.practicum.filmorate.util.TestHelper.createUser;
+import static ru.yandex.practicum.filmorate.util.TestHelper.*;
 
 @JdbcTest
 @AutoConfigureTestDatabase
@@ -50,7 +49,7 @@ class FilmDbStorageTest {
         assertThat(initFilms).isEmpty();
 
         int addedCnt = 10;
-        MpaRating mpa = mpaStorage.getById(1L).orElseThrow();
+        MpaRating mpa = getRequired(mpaStorage.getById(1L), NOT_FOUND_MPA);
         for (long i = 1; i <= addedCnt; i++) {
             filmStorage.add(createFilm(i, mpa));
         }
@@ -63,10 +62,10 @@ class FilmDbStorageTest {
 
     @Test
     void shouldAddAndGetFilm() {
-        MpaRating mpaCreate = mpaStorage.getById(1L).orElseThrow();
+        MpaRating mpaCreate = getRequired(mpaStorage.getById(1L), NOT_FOUND_MPA);
         List<Genre> genresCreate = List.of(
-                genreStorage.getById(1L).orElseThrow(),
-                genreStorage.getById(6L).orElseThrow()
+                getRequired(genreStorage.getById(1L), NOT_FOUND_GENRE),
+                getRequired(genreStorage.getById(6L), NOT_FOUND_GENRE)
         );
         Film filmToCreate = createFilm(1L, mpaCreate, genresCreate);
 
@@ -80,19 +79,19 @@ class FilmDbStorageTest {
 
     @Test
     void shouldUpdateFilm() {
-        MpaRating mpaCreate = mpaStorage.getById(1L).orElseThrow();
+        MpaRating mpaCreate = getRequired(mpaStorage.getById(1L), NOT_FOUND_MPA);
         List<Genre> genresCreate = List.of(
-                genreStorage.getById(1L).orElseThrow(),
-                genreStorage.getById(6L).orElseThrow()
+                getRequired(genreStorage.getById(1L), NOT_FOUND_GENRE),
+                getRequired(genreStorage.getById(6L), NOT_FOUND_GENRE)
         );
 
         Film filmToCreate = createFilm(1L, mpaCreate, genresCreate);
         Film createdFilm = filmStorage.add(filmToCreate);
 
-        MpaRating mpaUpdate = mpaStorage.getById(5L).orElseThrow();
+        MpaRating mpaUpdate = getRequired(mpaStorage.getById(5L), NOT_FOUND_MPA);
         List<Genre> genresUpdate = List.of(
-                genreStorage.getById(2L).orElseThrow(),
-                genreStorage.getById(5L).orElseThrow()
+                getRequired(genreStorage.getById(2L), NOT_FOUND_GENRE),
+                getRequired(genreStorage.getById(5L), NOT_FOUND_GENRE)
         );
         Film filmToUpdate = createFilm(2L, mpaUpdate, genresUpdate);
         filmToUpdate.setId(createdFilm.getId());
@@ -108,9 +107,9 @@ class FilmDbStorageTest {
     void shouldAddAndRemoveLike() {
         User userToCreate = createUser(1L);
         User createdUser = userStorage.add(userToCreate);
-        User createdUserFromDB = userStorage.getById(createdUser.getId()).orElseThrow();
+        User createdUserFromDB = getRequired(userStorage.getById(createdUser.getId()), NOT_FOUND_USER);
 
-        MpaRating mpaCreate = mpaStorage.getById(1L).orElseThrow();
+        MpaRating mpaCreate = getRequired(mpaStorage.getById(1L), NOT_FOUND_MPA);
         Film filmToCreate = createFilm(1L, mpaCreate);
         Film createdFilm = filmStorage.add(filmToCreate);
 
@@ -129,7 +128,7 @@ class FilmDbStorageTest {
     @Test
     void shouldReturnTopFilmsByLikes() {
         // Добавляем 10 фильмов
-        MpaRating mpa = mpaStorage.getById(1L).orElseThrow();
+        MpaRating mpa = getRequired(mpaStorage.getById(1L), NOT_FOUND_MPA);
         List<Film> films = new ArrayList<>();
         for (long i = 1; i <= 10; i++) {
             Film film = filmStorage.add(createFilm(i, mpa));

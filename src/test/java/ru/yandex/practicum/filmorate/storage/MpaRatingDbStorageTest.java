@@ -16,7 +16,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
-@AutoConfigureTestDatabase()
+@AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Import({MpaRatingDbStorage.class, MpaRatingRowMapper.class})
 class MpaRatingDbStorageTest {

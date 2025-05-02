@@ -22,10 +22,10 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static ru.yandex.practicum.filmorate.util.TestHelper.createFilm;
+import static ru.yandex.practicum.filmorate.util.TestHelper.*;
 
 @JdbcTest
-@AutoConfigureTestDatabase()
+@AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Import({GenreDbStorage.class, GenreRowMapper.class,
         FilmDbStorage.class, FilmRowMapper.class,
@@ -63,10 +63,10 @@ class GenreDbStorageTest {
 
     @Test
     void shouldReturnGenresByFilmId() {
-        MpaRating mpaCreate = mpaStorage.getById(1L).orElseThrow();
+        MpaRating mpaCreate = getRequired(mpaStorage.getById(1L), NOT_FOUND_MPA);
         List<Genre> genresCreate = List.of(
-                genreStorage.getById(1L).orElseThrow(),
-                genreStorage.getById(6L).orElseThrow()
+                getRequired(genreStorage.getById(1L), NOT_FOUND_GENRE),
+                getRequired(genreStorage.getById(6L), NOT_FOUND_GENRE)
         );
         Film filmToCreate = createFilm(1L, mpaCreate, genresCreate);
         Film createdFilm = filmStorage.add(filmToCreate);
