@@ -9,7 +9,7 @@ WHERE NOT EXISTS (SELECT 1 FROM mpa_ratings WHERE code = 'PG');
 
 INSERT INTO mpa_ratings (id, code, name, description)
 SELECT 3, 'PG_13', 'PG-13', 'Parents Strongly Cautioned: Не рекомендовано до 13'
-WHERE NOT EXISTS (SELECT 1 FROM mpa_ratings WHERE code = 'PG-13');
+WHERE NOT EXISTS (SELECT 1 FROM mpa_ratings WHERE code = 'PG_13');
 
 INSERT INTO mpa_ratings (id, code, name, description)
 SELECT 4, 'R', 'R', 'Restricted: До 17 лет с родителями'
@@ -17,7 +17,7 @@ WHERE NOT EXISTS (SELECT 1 FROM mpa_ratings WHERE code = 'R');
 
 INSERT INTO mpa_ratings (id, code, name, description)
 SELECT 5, 'NC_17', 'NC-17', 'Adults Only: До 18 лет запрещено'
-WHERE NOT EXISTS (SELECT 1 FROM mpa_ratings WHERE code = 'NC-17');
+WHERE NOT EXISTS (SELECT 1 FROM mpa_ratings WHERE code = 'NC_17');
 
 -- genres
 INSERT INTO genres (id, code, name, description)
