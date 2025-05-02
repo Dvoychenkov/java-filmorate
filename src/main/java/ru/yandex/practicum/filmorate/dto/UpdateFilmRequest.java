@@ -1,7 +1,12 @@
 package ru.yandex.practicum.filmorate.dto;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.validation.ReleaseDateValid;
 
 import java.time.LocalDate;
@@ -28,7 +33,7 @@ public class UpdateFilmRequest {
     private Integer duration;
 
     @NotNull(message = "Не указан рейтинг MPA")
-    private Long mpaRatingId;
+    private MpaRating mpa;
 
-    private List<Long> genresIds;
+    private List<Genre> genres;
 }

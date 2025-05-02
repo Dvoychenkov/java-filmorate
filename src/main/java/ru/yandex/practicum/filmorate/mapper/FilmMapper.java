@@ -28,8 +28,8 @@ public class FilmMapper {
         film.setDescription(request.getDescription());
         film.setReleaseDate(request.getReleaseDate());
         film.setDuration(request.getDuration());
-        film.setMpaRating(resolveMpaRating(request.getMpaRatingId()));
-        film.setGenres(resolveGenres(request.getGenresIds()));
+        film.setMpa(resolveMpaRating(request.getMpa()));
+        film.setGenres(resolveGenres(request.getGenres()));
         return film;
     }
 
@@ -38,8 +38,8 @@ public class FilmMapper {
         film.setDescription(request.getDescription());
         film.setReleaseDate(request.getReleaseDate());
         film.setDuration(request.getDuration());
-        film.setMpaRating(resolveMpaRating(request.getMpaRatingId()));
-        film.setGenres(resolveGenres(request.getGenresIds()));
+        film.setMpa(resolveMpaRating(request.getMpa()));
+        film.setGenres(resolveGenres(request.getGenres()));
     }
 
     public FilmDto mapToFilmDto(Film film) {
@@ -49,25 +49,26 @@ public class FilmMapper {
                 film.getDescription(),
                 film.getReleaseDate(),
                 film.getDuration(),
-                film.getMpaRating(),
+                film.getMpa(),
                 new ArrayList<>(film.getGenres())
         );
     }
 
-    private MpaRating resolveMpaRating(Long id) {
+    private MpaRating resolveMpaRating(MpaRating mpa) {
+        if (mpa == null || mpa.getId() == null) return null;
         return ValidationUtils.requireFound(
-                mpaRatingStorage.getById(id),
-                () -> "MPA рейтинг с ID " + id + " не найден"
+                mpaRatingStorage.getById(mpa.getId()),
+                () -> "MPA рейтинг с ID " + mpa.getId() + " не найден"
         );
     }
 
-    private List<Genre> resolveGenres(List<Long> genreIds) {
-        if (genreIds == null || genreIds.isEmpty()) return List.of();
-        return genreIds.stream()
+    private List<Genre> resolveGenres(List<Genre> genres) {
+        if (genres == null || genres.isEmpty()) return List.of();
+        return genres.stream()
                 .filter(Objects::nonNull)
-                .map(id -> ValidationUtils.requireFound(
-                                genreStorage.getById(id),
-                                () -> "Жанр с ID " + id + " не найден"
+                .map(genre -> ValidationUtils.requireFound(
+                                genreStorage.getById(genre.getId()),
+                                () -> "Жанр с ID " + genre.getId() + " не найден"
                         )
                 )
                 .distinct()

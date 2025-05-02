@@ -36,7 +36,7 @@ public class FilmRowMapper implements RowMapper<Film> {
         Long mpaId = rs.getLong("mpa_rating_id");
         MpaRating rating = mpaRatingStorage.getById(mpaId)
                 .orElseThrow(() -> new NotFoundException("MPA рейтинг не найден по id: " + mpaId));
-        film.setMpaRating(rating);
+        film.setMpa(rating);
 
         return film;
     }

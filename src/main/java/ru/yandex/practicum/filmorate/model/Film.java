@@ -33,11 +33,11 @@ public class Film {
     private Integer duration;
 
     @NotNull(message = "Не указан рейтинг MPA")
-    private MpaRating mpaRating;
-
-    private Set<Long> likesUsersIds = new HashSet<>();
+    private MpaRating mpa;
 
     private List<Genre> genres = new ArrayList<>();
+
+    private Set<Long> likesUsersIds = new HashSet<>();
 
     public int getLikesUsersIdsSize() {
         return likesUsersIds.size();

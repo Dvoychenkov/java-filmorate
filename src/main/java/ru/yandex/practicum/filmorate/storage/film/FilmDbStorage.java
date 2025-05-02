@@ -34,7 +34,13 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
     private static final String SQL_DELETE_GENRES_BY_FILM_ID = "DELETE FROM films_genres WHERE film_id = ?";
 
     // Обработка информации о лайках
-    private static final String SQL_INSERT_LIKE = "MERGE INTO films_users_likes (film_id, user_id) VALUES (?, ?)";
+    private static final String SQL_INSERT_LIKE = """
+            INSERT INTO films_users_likes (film_id, user_id)
+            SELECT ?, ?
+            WHERE NOT EXISTS (
+                SELECT 1 FROM films_users_likes WHERE film_id = ? AND user_id = ?
+            )
+            """;
     private static final String SQL_DELETE_LIKE = "DELETE FROM films_users_likes WHERE film_id = ? AND user_id = ?";
     private static final String SQL_SELECT_TOP_FILMS = """
                 SELECT f.*
@@ -62,7 +68,7 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
                 film.getDescription(),
                 film.getReleaseDate(),
                 film.getDuration(),
-                film.getMpaRating().getId()
+                film.getMpa().getId()
         );
 
         if (id == null) return null;
@@ -81,7 +87,7 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
                 film.getDescription(),
                 film.getReleaseDate(),
                 film.getDuration(),
-                film.getMpaRating().getId(),
+                film.getMpa().getId(),
                 film.getId()
         );
 
@@ -104,7 +110,7 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
 
     @Override
     public boolean addLike(Long filmId, Long userId) {
-        int affected = update(SQL_INSERT_LIKE, filmId, userId);
+        int affected = update(SQL_INSERT_LIKE, filmId, userId, filmId, userId);
         return affected > 0;
     }
 

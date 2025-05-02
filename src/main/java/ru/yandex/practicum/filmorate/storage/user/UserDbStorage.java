@@ -66,13 +66,12 @@ public class UserDbStorage extends BaseCRUDRepository<User> implements UserStora
             """;
 
     // Обработка информации о друзьях и общих друзьях
-    private static final String SQL_SELECT_CONFIRMED_FRIENDS = """
+    // Согласно ТЗ другом юзера считается даже тот юзер, который не совершал ответной заявки в друзья
+    private static final String SQL_SELECT_FRIENDS = """
                 SELECT u.* FROM users u
                 JOIN users_friendship f ON u.id = f.friend_id
                 WHERE f.user_id = ?
-                AND f.status_id = (SELECT id FROM friendship_status WHERE code = 'CONFIRMED')
             """;
-
     private static final String SQL_SELECT_COMMON_FRIENDS = """
                 SELECT u.* FROM users u
                 WHERE u.id IN (
@@ -80,8 +79,6 @@ public class UserDbStorage extends BaseCRUDRepository<User> implements UserStora
                     FROM users_friendship f1
                     JOIN users_friendship f2 ON f1.friend_id = f2.friend_id
                     WHERE f1.user_id = ? AND f2.user_id = ?
-                    AND f1.status_id = (SELECT id FROM friendship_status WHERE code = 'CONFIRMED')
-                    AND f2.status_id = (SELECT id FROM friendship_status WHERE code = 'CONFIRMED')
                 )
             """;
 
@@ -195,7 +192,7 @@ public class UserDbStorage extends BaseCRUDRepository<User> implements UserStora
 
     @Override
     public Collection<User> getFriends(Long userId) {
-        Collection<User> friends = queryMany(SQL_SELECT_ALL, userId);
+        Collection<User> friends = queryMany(SQL_SELECT_FRIENDS, userId);
         log.info("Получено {} друзей для юзера {} из БД", friends.size(), userId);
         return friends;
     }

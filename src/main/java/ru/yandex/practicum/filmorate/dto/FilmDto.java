@@ -14,6 +14,6 @@ public class FilmDto {
     String description;
     LocalDate releaseDate;
     Integer duration;
-    MpaRating mpaRating;
+    MpaRating mpa;
     List<Genre> genres;
 }
