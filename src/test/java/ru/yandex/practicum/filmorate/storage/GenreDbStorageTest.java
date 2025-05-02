@@ -68,7 +68,7 @@ class GenreDbStorageTest {
                 getRequired(genreStorage.getById(1L), NOT_FOUND_GENRE),
                 getRequired(genreStorage.getById(6L), NOT_FOUND_GENRE)
         );
-        Film filmToCreate = createFilm(1L, mpaCreate, genresCreate);
+        Film filmToCreate = generateFilm(mpaCreate, genresCreate);
         Film createdFilm = filmStorage.add(filmToCreate);
 
         Collection<Genre> genresOfFilm = genreStorage.getByFilmId(createdFilm.getId());

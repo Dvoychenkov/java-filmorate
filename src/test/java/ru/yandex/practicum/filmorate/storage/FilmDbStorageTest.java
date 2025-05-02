@@ -51,7 +51,7 @@ class FilmDbStorageTest {
         int addedCnt = 10;
         MpaRating mpa = getRequired(mpaStorage.getById(1L), NOT_FOUND_MPA);
         for (long i = 1; i <= addedCnt; i++) {
-            filmStorage.add(createFilm(i, mpa));
+            filmStorage.add(generateFilm(mpa));
         }
 
         Collection<Film> allFilms = filmStorage.getAll();
@@ -67,7 +67,7 @@ class FilmDbStorageTest {
                 getRequired(genreStorage.getById(1L), NOT_FOUND_GENRE),
                 getRequired(genreStorage.getById(6L), NOT_FOUND_GENRE)
         );
-        Film filmToCreate = createFilm(1L, mpaCreate, genresCreate);
+        Film filmToCreate = generateFilm(mpaCreate, genresCreate);
 
         Film createdFilm = filmStorage.add(filmToCreate);
         Optional<Film> createdFilmFromDB = filmStorage.getById(createdFilm.getId());
@@ -85,7 +85,7 @@ class FilmDbStorageTest {
                 getRequired(genreStorage.getById(6L), NOT_FOUND_GENRE)
         );
 
-        Film filmToCreate = createFilm(1L, mpaCreate, genresCreate);
+        Film filmToCreate = generateFilm(mpaCreate, genresCreate);
         Film createdFilm = filmStorage.add(filmToCreate);
 
         MpaRating mpaUpdate = getRequired(mpaStorage.getById(5L), NOT_FOUND_MPA);
@@ -93,7 +93,7 @@ class FilmDbStorageTest {
                 getRequired(genreStorage.getById(2L), NOT_FOUND_GENRE),
                 getRequired(genreStorage.getById(5L), NOT_FOUND_GENRE)
         );
-        Film filmToUpdate = createFilm(2L, mpaUpdate, genresUpdate);
+        Film filmToUpdate = generateFilm(mpaUpdate, genresUpdate);
         filmToUpdate.setId(createdFilm.getId());
         Film updatedFilm = filmStorage.update(filmToUpdate);
 
@@ -105,12 +105,12 @@ class FilmDbStorageTest {
 
     @Test
     void shouldAddAndRemoveLike() {
-        User userToCreate = createUser(1L);
+        User userToCreate = generateUser();
         User createdUser = userStorage.add(userToCreate);
         User createdUserFromDB = getRequired(userStorage.getById(createdUser.getId()), NOT_FOUND_USER);
 
         MpaRating mpaCreate = getRequired(mpaStorage.getById(1L), NOT_FOUND_MPA);
-        Film filmToCreate = createFilm(1L, mpaCreate);
+        Film filmToCreate = generateFilm(mpaCreate);
         Film createdFilm = filmStorage.add(filmToCreate);
 
         // Пробуем снять лайк, который не ставили
@@ -131,12 +131,12 @@ class FilmDbStorageTest {
         MpaRating mpa = getRequired(mpaStorage.getById(1L), NOT_FOUND_MPA);
         List<Film> films = new ArrayList<>();
         for (long i = 1; i <= 10; i++) {
-            Film film = filmStorage.add(createFilm(i, mpa));
+            Film film = filmStorage.add(generateFilm(mpa));
             films.add(film);
 
             // Ставим лайки
             for (int j = 1; j <= i * 10; j++) {
-                User user = userStorage.add(createUser(i * 100 + j));
+                User user = userStorage.add(generateUser());
                 filmStorage.addLike(film.getId(), user.getId());
             }
         }

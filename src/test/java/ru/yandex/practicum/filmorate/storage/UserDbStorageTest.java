@@ -16,7 +16,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static ru.yandex.practicum.filmorate.util.TestHelper.createUser;
+import static ru.yandex.practicum.filmorate.util.TestHelper.generateUser;
 
 @JdbcTest
 @AutoConfigureTestDatabase
@@ -33,7 +33,7 @@ class UserDbStorageTest {
 
         int addedCnt = 10;
         for (long i = 1; i <= addedCnt; i++) {
-            userStorage.add(createUser(i));
+            userStorage.add(generateUser());
         }
 
         Collection<User> allUsers = userStorage.getAll();
@@ -44,7 +44,7 @@ class UserDbStorageTest {
 
     @Test
     void shouldAddAndGetUser() {
-        User userToCreate = createUser(1L);
+        User userToCreate = generateUser();
         User createdUser = userStorage.add(userToCreate);
         Optional<User> createdUserFromDB = userStorage.getById(createdUser.getId());
 
@@ -55,10 +55,10 @@ class UserDbStorageTest {
 
     @Test
     void shouldUpdateUser() {
-        User userToCreate = createUser(1L);
+        User userToCreate = generateUser();
         User createdUser = userStorage.add(userToCreate);
 
-        User userToUpdate = createUser(2L);
+        User userToUpdate = generateUser();
         userToUpdate.setId(createdUser.getId());
         User updatedUser = userStorage.update(userToUpdate);
 
@@ -70,8 +70,8 @@ class UserDbStorageTest {
 
     @Test
     void shouldAddFriends() {
-        User user1 = userStorage.add(createUser(1L));
-        User user2 = userStorage.add(createUser(2L));
+        User user1 = userStorage.add(generateUser());
+        User user2 = userStorage.add(generateUser());
 
         // Первая заявка от user1 к user2: PENDING
         FriendshipAddResult result1 = userStorage.addFriend(user1.getId(), user2.getId());
@@ -92,8 +92,8 @@ class UserDbStorageTest {
 
     @Test
     void shouldRemoveFriends() {
-        User u1 = userStorage.add(createUser(1L));
-        User u2 = userStorage.add(createUser(2L));
+        User u1 = userStorage.add(generateUser());
+        User u2 = userStorage.add(generateUser());
 
         // Взаимно добавились: CONFIRMED у обоих сторон
         userStorage.addFriend(u1.getId(), u2.getId());
@@ -114,10 +114,10 @@ class UserDbStorageTest {
 
     @Test
     void shouldReturnFriends() {
-        User u1 = userStorage.add(createUser(1L));
-        User u2 = userStorage.add(createUser(2L));
-        User u3 = userStorage.add(createUser(3L));
-        User u4 = userStorage.add(createUser(4L));
+        User u1 = userStorage.add(generateUser());
+        User u2 = userStorage.add(generateUser());
+        User u3 = userStorage.add(generateUser());
+        User u4 = userStorage.add(generateUser());
 
         userStorage.addFriend(u1.getId(), u2.getId());
         userStorage.addFriend(u1.getId(), u3.getId());
@@ -131,9 +131,9 @@ class UserDbStorageTest {
 
     @Test
     void shouldReturnCommonFriends() {
-        User u1 = userStorage.add(createUser(1L));
-        User u2 = userStorage.add(createUser(2L));
-        User u3 = userStorage.add(createUser(3L));
+        User u1 = userStorage.add(generateUser());
+        User u2 = userStorage.add(generateUser());
+        User u3 = userStorage.add(generateUser());
 
         userStorage.addFriend(u1.getId(), u3.getId());
         userStorage.addFriend(u2.getId(), u3.getId());
