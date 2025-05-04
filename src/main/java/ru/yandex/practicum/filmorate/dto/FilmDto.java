@@ -9,11 +9,11 @@ import java.util.List;
 
 @Value
 public class FilmDto {
-    Long id;
-    String name;
-    String description;
-    LocalDate releaseDate;
-    Integer duration;
-    MpaRating mpa;
-    List<Genre> genres;
+    private Long id;
+    private String name;
+    private String description;
+    private LocalDate releaseDate;
+    private Integer duration;
+    private MpaRating mpa;
+    private List<Genre> genres;
 }
