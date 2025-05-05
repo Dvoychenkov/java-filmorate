@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate;
+package ru.yandex.practicum.filmorate.validation;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -7,6 +7,7 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -178,6 +179,7 @@ public class FilmValidationTest {
         film.setDescription("Описание фильма");
         film.setReleaseDate(LocalDate.of(2000, 1, 1));
         film.setDuration(120);
+        film.setMpa(new MpaRating(1L, "G", "G", "General Audiences: Нет возрастных ограничений"));
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertTrue(violations.isEmpty());

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate;
+package ru.yandex.practicum.filmorate.validation;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -7,10 +7,13 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.UserController;
+import ru.yandex.practicum.filmorate.dto.NewUserRequest;
+import ru.yandex.practicum.filmorate.dto.UserDto;
+import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.services.UserService;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -112,13 +115,14 @@ public class UserValidationTest {
 
     @Test
     void shouldNormalizeEmptyName() {
-        User user = new User();
+        NewUserRequest user = new NewUserRequest();
         user.setLogin("okLogin");
 
         UserStorage userStorage = new InMemoryUserStorage();
-        UserService userService = new UserService(userStorage);
+        UserMapper userMapper = new UserMapper();
+        UserService userService = new UserService(userStorage, userMapper);
         UserController controller = new UserController(userService);
-        User createdUser = controller.create(user);
+        UserDto createdUser = controller.create(user);
         assertEquals("okLogin", createdUser.getName());
 
         user.setName("");
