@@ -96,4 +96,8 @@ public class FilmService {
         return film;
     }
 
+    public void removeFilm(Long id) {
+        filmStorage.removeFilm(id);
+        log.info("Фильм с ID {} удалён", id);
+    }
 }

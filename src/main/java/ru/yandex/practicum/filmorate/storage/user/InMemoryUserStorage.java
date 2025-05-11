@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.FriendshipStatus;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.enums.FriendshipAddResult;
@@ -166,5 +167,21 @@ public class InMemoryUserStorage implements UserStorage {
                 .map(commonFriendId -> getById(commonFriendId).orElse(null))
                 .filter(Objects::nonNull)
                 .toList();
+    }
+
+    @Override
+    public void removeUser(Long id) {
+        log.info("Удаление пользователя с ID {}", id);
+        if (id == null || !users.containsKey(id)) {
+            log.warn("Пользователь с ID {} не найден", id);
+            throw new NotFoundException("Пользователь с id " + id + " не найден");
+        }
+
+        for (User user : users.values()) {
+            user.getFriends().remove(id);
+        }
+
+        users.remove(id);
+        log.info("Пользователь с ID {} удален", id);
     }
 }
