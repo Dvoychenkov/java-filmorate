@@ -158,4 +158,16 @@ class FilmDbStorageTest {
                 .toList();
         assertThat(actualIds).isEqualTo(expectedFilmsIds);
     }
+
+    @Test
+    void shouldRemoveFilm() {
+        MpaRating mpa = getRequired(mpaStorage.getById(1L), NOT_FOUND_MPA);
+        Film filmToCreate = generateFilm(mpa);
+        Film createdFilm = filmStorage.add(filmToCreate);
+        Long filmId = createdFilm.getId();
+
+        filmStorage.removeFilm(filmId);
+        Optional<Film> filmFromDb = filmStorage.getById(filmId);
+        assertThat(filmFromDb).isNotPresent();
+    }
 }

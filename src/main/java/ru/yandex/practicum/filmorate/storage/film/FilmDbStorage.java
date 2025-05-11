@@ -50,6 +50,9 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
                 ORDER BY COUNT(l.user_id) DESC
                 LIMIT ?
             """;
+    private static final String SQL_DELETE_FILM = "DELETE FROM films WHERE id = ?";
+    private static final String SQL_DELETE_LIKES_BY_FILM_ID = "DELETE FROM films_users_likes WHERE film_id = ?";
+
 
 
     public FilmDbStorage(JdbcTemplate jdbcTemplate, FilmRowMapper filmRowMapper) {
@@ -123,6 +126,14 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
     @Override
     public Collection<Film> getTopFilmsByLikes(int count) {
         return queryMany(SQL_SELECT_TOP_FILMS, count);
+    }
+
+    @Override
+    public void removeFilm(Long id) {
+        update(SQL_DELETE_GENRES_BY_FILM_ID, id);
+        update(SQL_DELETE_LIKES_BY_FILM_ID, id);
+        update(SQL_DELETE_FILM, id);
+        log.info("Фильм с ID {} удалён из БД", id);
     }
 
     private void insertGenres(Long filmId, List<Genre> genres) {
