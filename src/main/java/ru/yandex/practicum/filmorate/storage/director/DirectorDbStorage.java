@@ -66,8 +66,7 @@ public class DirectorDbStorage extends BaseCRUDRepository<Director> implements D
         int result = delete(SQL_DELETE_BY_ID, id);
         if (result > 0) {
             log.info("Режиссер удален");
-        }
-        else {
+        } else {
             throw new NotFoundException("Режиссер не удалён");
         }
     }
