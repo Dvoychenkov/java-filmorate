@@ -39,6 +39,8 @@ public class Film {
     @NotNull(message = "Не указан рейтинг MPA")
     private MpaRating mpa;
 
+    private Director director;
+
     private List<Genre> genres = new ArrayList<>();
 
     private Set<Long> likesUsersIds = new HashSet<>();

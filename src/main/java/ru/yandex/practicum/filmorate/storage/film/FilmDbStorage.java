@@ -20,12 +20,12 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
     private static final String SQL_SELECT_ALL = "SELECT * FROM films";
     private static final String SQL_SELECT_BY_ID = "SELECT * FROM films WHERE id = ?";
     private static final String SQL_INSERT = """
-            INSERT INTO films (name, description, release_date, duration, mpa_rating_id)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO films (name, description, release_date, duration, mpa_rating_id, director_id)
+            VALUES (?, ?, ?, ?, ?, ?)
             """;
     private static final String SQL_UPDATE = """
             UPDATE films
-            SET name = ?, description = ?, release_date = ?, duration = ?, mpa_rating_id = ?
+            SET name = ?, description = ?, release_date = ?, duration = ?, mpa_rating_id = ?, director_id = ?
             WHERE id = ?
             """;
 
@@ -51,6 +51,15 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
                 LIMIT ?
             """;
 
+    private static final String SQL_DIRECTOR_FILMS_YEARS = "SELECT * FROM films WHERE director_id = ? ORDER BY release_date DESC";
+    private static final String SQL_DIRECTOR_FILMS_LIKES = """
+                SELECT f.*
+                FROM films f
+                LEFT JOIN films_users_likes l ON f.id = l.film_id
+                WHERE f.director_id = ?
+                GROUP BY f.id
+                ORDER BY COUNT(l.user_id) DESC
+            """;
 
     public FilmDbStorage(JdbcTemplate jdbcTemplate, FilmRowMapper filmRowMapper) {
         super(jdbcTemplate, filmRowMapper);
@@ -68,7 +77,8 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
                 film.getDescription(),
                 film.getReleaseDate(),
                 film.getDuration(),
-                film.getMpa().getId()
+                film.getMpa().getId(),
+                film.getDirector().getId()
         );
 
         if (id == null) return null;
@@ -88,6 +98,7 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
                 film.getReleaseDate(),
                 film.getDuration(),
                 film.getMpa().getId(),
+                film.getDirector().getId(),
                 film.getId()
         );
 
@@ -123,6 +134,16 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
     @Override
     public Collection<Film> getTopFilmsByLikes(int count) {
         return queryMany(SQL_SELECT_TOP_FILMS, count);
+    }
+
+    @Override
+    public Collection<Film> getDirectorFilmsSortedByYears(Long directorId) {
+        return queryMany(SQL_DIRECTOR_FILMS_YEARS, directorId);
+    }
+
+    @Override
+    public Collection<Film> getDirectorFilmsSortedByLikes(Long directorId) {
+        return queryMany(SQL_DIRECTOR_FILMS_LIKES, directorId);
     }
 
     private void insertGenres(Long filmId, List<Genre> genres) {
