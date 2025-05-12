@@ -19,4 +19,8 @@ public interface FilmStorage {
     boolean removeLike(Long filmId, Long userId);
 
     Collection<Film> getTopFilmsByLikes(int count);
+
+    Collection<Film> getDirectorFilmsSortedByYears(Long directorId);
+
+    Collection<Film> getDirectorFilmsSortedByLikes(Long directorId);
 }

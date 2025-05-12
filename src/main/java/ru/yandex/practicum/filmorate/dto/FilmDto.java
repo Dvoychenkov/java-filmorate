@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.dto;
 
 import lombok.Value;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MpaRating;
 
@@ -16,4 +17,5 @@ public class FilmDto {
     private Integer duration;
     private MpaRating mpa;
     private List<Genre> genres;
+    private Director director;
 }
