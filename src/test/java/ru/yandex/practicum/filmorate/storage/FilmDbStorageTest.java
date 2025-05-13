@@ -284,7 +284,10 @@ class FilmDbStorageTest {
     @Test
     void shouldRemoveFilm() {
         MpaRating mpa = getRequired(mpaStorage.getById(1L), NOT_FOUND_MPA);
-        Film filmToCreate = generateFilm(mpa);
+        Director directorToCreate1 = generateDirector();
+        Director createdDirector1 = directorStorage.add(directorToCreate1);
+        List<Director> directors = new ArrayList<>();
+        Film filmToCreate = generateFilm(mpa, directors);
         Film createdFilm = filmStorage.add(filmToCreate);
         Long filmId = createdFilm.getId();
 
