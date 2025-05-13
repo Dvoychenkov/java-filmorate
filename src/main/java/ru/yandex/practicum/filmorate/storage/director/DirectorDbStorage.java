@@ -36,6 +36,10 @@ public class DirectorDbStorage extends BaseCRUDRepository<Director> implements D
             JOIN films_directors fd ON d.id = fd.director_id
             WHERE fd.film_id = ?
             """;
+    private static final String SQL_DELETE_FILMS_OF_DIRECTOR = """
+            DELETE FROM films_directors
+            WHERE director_id = ?
+            """;
 
     public DirectorDbStorage(JdbcTemplate jdbcTemplate, RowMapper<Director> rowMapper) {
         super(jdbcTemplate, rowMapper);
@@ -70,6 +74,7 @@ public class DirectorDbStorage extends BaseCRUDRepository<Director> implements D
 
     @Override
     public void delete(Long id) {
+        delete(SQL_DELETE_FILMS_OF_DIRECTOR, id);
         int result = delete(SQL_DELETE_BY_ID, id);
         if (result > 0) {
             log.info("Режиссер удален");
