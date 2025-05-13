@@ -33,7 +33,7 @@ public class FilmMapper {
         film.setDuration(request.getDuration());
         film.setMpa(resolveMpaRating(request.getMpa()));
         film.setGenres(resolveGenres(request.getGenres()));
-        film.setDirector(resolveDirector(request.getDirector()));
+        film.setDirectors(resolveDirectors(request.getDirectors()));
         return film;
     }
 
@@ -44,7 +44,7 @@ public class FilmMapper {
         film.setDuration(request.getDuration());
         film.setMpa(resolveMpaRating(request.getMpa()));
         film.setGenres(resolveGenres(request.getGenres()));
-        film.setDirector(resolveDirector(request.getDirector()));
+        film.setDirectors(resolveDirectors(request.getDirectors()));
     }
 
     public FilmDto mapToFilmDto(Film film) {
@@ -56,7 +56,7 @@ public class FilmMapper {
                 film.getDuration(),
                 film.getMpa(),
                 new ArrayList<>(film.getGenres()),
-                film.getDirector()
+                new ArrayList<>(film.getDirectors())
         );
     }
 
@@ -68,12 +68,17 @@ public class FilmMapper {
         );
     }
 
-    private Director resolveDirector(Director director) {
-        if (director == null || director.getId() == null) return null;
-        return ValidationUtils.requireFound(
-                directorStorage.getById(director.getId()),
-                () -> "Директор с ID " + director.getId() + " не найден"
-        );
+    private List<Director> resolveDirectors(List<Director> directors) {
+        if (directors == null || directors.isEmpty()) return List.of();
+        return directors.stream()
+                .filter(Objects::nonNull)
+                .map(director -> ValidationUtils.requireFound(
+                                directorStorage.getById(director.getId()),
+                                () -> "Режиссер с ID " + director.getId() + " не найден"
+                        )
+                )
+                .distinct()
+                .toList();
     }
 
     private List<Genre> resolveGenres(List<Genre> genres) {

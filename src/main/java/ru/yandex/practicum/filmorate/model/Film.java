@@ -39,7 +39,7 @@ public class Film {
     @NotNull(message = "Не указан рейтинг MPA")
     private MpaRating mpa;
 
-    private Director director;
+    private List<Director> directors;
 
     private List<Genre> genres = new ArrayList<>();
 

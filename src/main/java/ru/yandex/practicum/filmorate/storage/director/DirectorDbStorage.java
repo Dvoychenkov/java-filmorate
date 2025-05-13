@@ -7,9 +7,11 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.base.BaseCRUDRepository;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -28,6 +30,11 @@ public class DirectorDbStorage extends BaseCRUDRepository<Director> implements D
             UPDATE directors
             SET name = ?
             WHERE id = ?
+            """;
+    private static final String SQL_SELECT_BY_FILM_ID = """
+            SELECT d.* FROM directors d
+            JOIN films_directors fd ON d.id = fd.director_id
+            WHERE fd.film_id = ?
             """;
 
     public DirectorDbStorage(JdbcTemplate jdbcTemplate, RowMapper<Director> rowMapper) {
@@ -80,5 +87,12 @@ public class DirectorDbStorage extends BaseCRUDRepository<Director> implements D
 
         log.info("Режиссер обновлён в БД: {}", director);
         return director;
+    }
+
+    @Override
+    public Collection<Director> getByFilmId(Long filmId) {
+        Collection<Director> directors = queryMany(SQL_SELECT_BY_FILM_ID, filmId);
+        log.info("Получено {} режиссеров из БД по id фильма {}", directors.size(), filmId);
+        return directors;
     }
 }

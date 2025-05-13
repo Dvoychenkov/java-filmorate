@@ -35,6 +35,5 @@ public class NewFilmRequest {
 
     private List<Genre> genres;
 
-    @NotNull(message = "Не указан режиссер")
-    private Director director;
+    private List<Director> directors;
 }

@@ -19,6 +19,7 @@ import ru.yandex.practicum.filmorate.storage.genre.GenreRowMapper;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaRatingDbStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaRatingRowMapper;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -70,12 +71,14 @@ class GenreDbStorageTest {
     void shouldReturnGenresByFilmId() {
         Director directorToCreate = generateDirector();
         Director createdDirector = directorStorage.add(directorToCreate);
+        List<Director> directors = new ArrayList<>();
+        directors.add(createdDirector);
         MpaRating mpaCreate = getRequired(mpaStorage.getById(1L), NOT_FOUND_MPA);
         List<Genre> genresCreate = List.of(
                 getRequired(genreStorage.getById(1L), NOT_FOUND_GENRE),
                 getRequired(genreStorage.getById(6L), NOT_FOUND_GENRE)
         );
-        Film filmToCreate = generateFilm(mpaCreate, createdDirector, genresCreate);
+        Film filmToCreate = generateFilm(mpaCreate, directors, genresCreate);
         Film createdFilm = filmStorage.add(filmToCreate);
 
         Collection<Genre> genresOfFilm = genreStorage.getByFilmId(createdFilm.getId());

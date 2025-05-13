@@ -65,7 +65,7 @@ public class FilmController {
 
     @GetMapping("/director/{directorId}")
     public Collection<FilmDto> getDirectorFilms(@PathVariable Long directorId, @RequestParam SortOption sortBy) {
-        if (sortBy == SortOption.YEARS) {
+        if (sortBy == SortOption.YEAR) {
             return filmService.getTopFilmsByYears(directorId);
         } else if (sortBy == SortOption.LIKES) {
             return filmService.getTopFilmsByLikes(directorId);

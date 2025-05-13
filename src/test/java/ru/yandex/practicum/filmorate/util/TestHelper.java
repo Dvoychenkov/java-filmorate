@@ -33,11 +33,11 @@ public class TestHelper {
         );
     }
 
-    public static Film generateFilm(MpaRating mpaRating, Director director) {
-        return generateFilm(mpaRating, director, List.of());
+    public static Film generateFilm(MpaRating mpaRating, List<Director> directors) {
+        return generateFilm(mpaRating, directors, List.of());
     }
 
-    public static Film generateFilm(MpaRating mpaRating, Director director, List<Genre> genres) {
+    public static Film generateFilm(MpaRating mpaRating, List<Director> directors, List<Genre> genres) {
         return new Film(
                 null,
                 faker.book().title(),
@@ -45,7 +45,7 @@ public class TestHelper {
                 generatePastDate(),
                 faker.number().numberBetween(60, 180),
                 mpaRating,
-                director,
+                new ArrayList<>(directors),
                 new ArrayList<>(genres),
                 new HashSet<>()
         );

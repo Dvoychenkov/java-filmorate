@@ -54,10 +54,12 @@ class FilmDbStorageTest {
 
         Director directorToCreate = generateDirector();
         Director createdDirector = directorStorage.add(directorToCreate);
+        List<Director> directors = new ArrayList<>();
+        directors.add(createdDirector);
         int addedCnt = 10;
         MpaRating mpa = getRequired(mpaStorage.getById(1L), NOT_FOUND_MPA);
         for (long i = 1; i <= addedCnt; i++) {
-            filmStorage.add(generateFilm(mpa, createdDirector));
+            filmStorage.add(generateFilm(mpa, directors));
         }
 
         Collection<Film> allFilms = filmStorage.getAll();
@@ -70,12 +72,14 @@ class FilmDbStorageTest {
     void shouldAddAndGetFilm() {
         Director directorToCreate = generateDirector();
         Director createdDirector = directorStorage.add(directorToCreate);
+        List<Director> directors = new ArrayList<>();
+        directors.add(createdDirector);
         MpaRating mpaCreate = getRequired(mpaStorage.getById(1L), NOT_FOUND_MPA);
         List<Genre> genresCreate = List.of(
                 getRequired(genreStorage.getById(1L), NOT_FOUND_GENRE),
                 getRequired(genreStorage.getById(6L), NOT_FOUND_GENRE)
         );
-        Film filmToCreate = generateFilm(mpaCreate, createdDirector, genresCreate);
+        Film filmToCreate = generateFilm(mpaCreate, directors, genresCreate);
 
         Film createdFilm = filmStorage.add(filmToCreate);
         Optional<Film> createdFilmFromDB = filmStorage.getById(createdFilm.getId());
@@ -89,13 +93,15 @@ class FilmDbStorageTest {
     void shouldUpdateFilm() {
         Director directorToCreate = generateDirector();
         Director createdDirector = directorStorage.add(directorToCreate);
+        List<Director> directors = new ArrayList<>();
+        directors.add(createdDirector);
         MpaRating mpaCreate = getRequired(mpaStorage.getById(1L), NOT_FOUND_MPA);
         List<Genre> genresCreate = List.of(
                 getRequired(genreStorage.getById(1L), NOT_FOUND_GENRE),
                 getRequired(genreStorage.getById(6L), NOT_FOUND_GENRE)
         );
 
-        Film filmToCreate = generateFilm(mpaCreate, createdDirector, genresCreate);
+        Film filmToCreate = generateFilm(mpaCreate, directors, genresCreate);
         Film createdFilm = filmStorage.add(filmToCreate);
 
         MpaRating mpaUpdate = getRequired(mpaStorage.getById(5L), NOT_FOUND_MPA);
@@ -105,7 +111,9 @@ class FilmDbStorageTest {
         );
         Director newDirectorToCreate = generateDirector();
         Director createdNewDirector = directorStorage.add(newDirectorToCreate);
-        Film filmToUpdate = generateFilm(mpaUpdate, createdNewDirector, genresUpdate);
+        List<Director> newDirectors = new ArrayList<>();
+        directors.add(createdNewDirector);
+        Film filmToUpdate = generateFilm(mpaUpdate, newDirectors, genresUpdate);
         filmToUpdate.setId(createdFilm.getId());
         Film updatedFilm = filmStorage.update(filmToUpdate);
 
@@ -123,8 +131,10 @@ class FilmDbStorageTest {
 
         Director directorToCreate = generateDirector();
         Director createdDirector = directorStorage.add(directorToCreate);
+        List<Director> directors = new ArrayList<>();
+        directors.add(createdDirector);
         MpaRating mpaCreate = getRequired(mpaStorage.getById(1L), NOT_FOUND_MPA);
-        Film filmToCreate = generateFilm(mpaCreate, createdDirector);
+        Film filmToCreate = generateFilm(mpaCreate, directors);
         Film createdFilm = filmStorage.add(filmToCreate);
 
         // Пробуем снять лайк, который не ставили
@@ -144,10 +154,12 @@ class FilmDbStorageTest {
         // Добавляем 10 фильмов
         Director directorToCreate = generateDirector();
         Director createdDirector = directorStorage.add(directorToCreate);
+        List<Director> directors = new ArrayList<>();
+        directors.add(createdDirector);
         MpaRating mpa = getRequired(mpaStorage.getById(1L), NOT_FOUND_MPA);
         List<Film> films = new ArrayList<>();
         for (long i = 1; i <= 10; i++) {
-            Film film = filmStorage.add(generateFilm(mpa, createdDirector));
+            Film film = filmStorage.add(generateFilm(mpa, directors));
             films.add(film);
 
             // Ставим лайки
@@ -180,15 +192,19 @@ class FilmDbStorageTest {
         // Добавляем 10 фильмов
         Director directorToCreate1 = generateDirector();
         Director createdDirector1 = directorStorage.add(directorToCreate1);
+        List<Director> directors1 = new ArrayList<>();
+        directors1.add(createdDirector1);
 
         Director directorToCreate2 = generateDirector();
         Director createdDirector2 = directorStorage.add(directorToCreate2);
+        List<Director> directors2 = new ArrayList<>();
+        directors2.add(createdDirector2);
 
         MpaRating mpa = getRequired(mpaStorage.getById(1L), NOT_FOUND_MPA);
         List<Film> films = new ArrayList<>();
         int year1 = 2008;
         for (long i = 0; i < 10; i++) {
-            Film filmToAdd = generateFilm(mpa, createdDirector1);
+            Film filmToAdd = generateFilm(mpa, directors1);
             filmToAdd.setReleaseDate(LocalDate.of(year1, 1, 1));
 
             Film film = filmStorage.add(filmToAdd);
@@ -200,7 +216,7 @@ class FilmDbStorageTest {
         MpaRating mpa2 = getRequired(mpaStorage.getById(2L), NOT_FOUND_MPA);
         List<Film> films2 = new ArrayList<>();
         for (long i = 0; i < 9; i++) {
-            Film filmToAdd = generateFilm(mpa2, createdDirector2);
+            Film filmToAdd = generateFilm(mpa2, directors2);
             filmToAdd.setReleaseDate(LocalDate.of(year2, 1, 1));
 
             Film film = filmStorage.add(filmToAdd);
@@ -216,14 +232,14 @@ class FilmDbStorageTest {
         assertThat(director2FilmsSortedByYears.size()).isEqualTo(9);
 
         int year = directorFilmsSortedByYears.stream().findFirst().orElseThrow().getReleaseDate().getYear();
-        assertThat(year).isEqualTo(2017);
-        year = directorFilmsSortedByYears.stream().skip(9).findFirst().orElseThrow().getReleaseDate().getYear();
         assertThat(year).isEqualTo(2008);
+        year = directorFilmsSortedByYears.stream().skip(9).findFirst().orElseThrow().getReleaseDate().getYear();
+        assertThat(year).isEqualTo(2017);
 
         year = director2FilmsSortedByYears.stream().findFirst().orElseThrow().getReleaseDate().getYear();
-        assertThat(year).isEqualTo(2018);
-        year = director2FilmsSortedByYears.stream().skip(8).findFirst().orElseThrow().getReleaseDate().getYear();
         assertThat(year).isEqualTo(2010);
+        year = director2FilmsSortedByYears.stream().skip(8).findFirst().orElseThrow().getReleaseDate().getYear();
+        assertThat(year).isEqualTo(2018);
     }
 
     @Test
@@ -231,6 +247,8 @@ class FilmDbStorageTest {
         // Добавляем 10 фильмов
         Director directorToCreate1 = generateDirector();
         Director createdDirector1 = directorStorage.add(directorToCreate1);
+        List<Director> directors = new ArrayList<>();
+        directors.add(createdDirector1);
 
         List<User> users = new ArrayList<>();
         for (long i = 0; i < 20; i++) {
@@ -242,7 +260,7 @@ class FilmDbStorageTest {
         List<Film> films = new ArrayList<>();
         for (long i = 1; i <= 2; i++) {
             MpaRating mpa = getRequired(mpaStorage.getById(i), NOT_FOUND_MPA);
-            Film filmToAdd = generateFilm(mpa, createdDirector1);
+            Film filmToAdd = generateFilm(mpa, directors);
             Film film = filmStorage.add(filmToAdd);
             films.add(film);
         }

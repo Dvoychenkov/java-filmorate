@@ -37,7 +37,7 @@ public class UpdateFilmRequest {
     private MpaRating mpa;
 
     @NotNull(message = "Режиссер не может быть пустым")
-    private Director director;
+    private List<Director> directors;
 
     private List<Genre> genres;
 }

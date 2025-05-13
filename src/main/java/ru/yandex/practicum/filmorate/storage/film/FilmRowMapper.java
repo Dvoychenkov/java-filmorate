@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
@@ -13,6 +14,7 @@ import ru.yandex.practicum.filmorate.storage.mpa.MpaRatingStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 
 @Component
 @RequiredArgsConstructor
@@ -41,10 +43,8 @@ public class FilmRowMapper implements RowMapper<Film> {
                 .orElseThrow(() -> new NotFoundException("MPA рейтинг не найден по id: " + mpaId));
         film.setMpa(rating);
 
-        Long directorId = rs.getLong("director_id");
-        Director director = directorStorage.getById(directorId)
-                .orElseThrow(() -> new NotFoundException("Режиссер не найден по id: " + directorId));
-        film.setDirector(director);
+        // Получение режиссеров фильма
+        film.setDirectors(directorStorage.getByFilmId(filmId).stream().toList());
 
         return film;
     }
