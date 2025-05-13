@@ -51,6 +51,9 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
                 ORDER BY COUNT(l.user_id) DESC
                 LIMIT ?
             """;
+    private static final String SQL_DELETE_FILM = "DELETE FROM films WHERE id = ?";
+    private static final String SQL_DELETE_LIKES_BY_FILM_ID = "DELETE FROM films_users_likes WHERE film_id = ?";
+
 
     // Обработка информации о режиссерах
     private static final String SQL_INSERT_DIRECTOR = "INSERT INTO films_directors (film_id, director_id) VALUES (?, ?)";
@@ -151,6 +154,14 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
     @Override
     public Collection<Film> getDirectorFilmsSortedByLikes(Long directorId) {
         return queryMany(SQL_DIRECTOR_FILMS_LIKES, directorId);
+    }
+
+    @Override
+    public void removeFilm(Long id) {
+        update(SQL_DELETE_GENRES_BY_FILM_ID, id);
+        update(SQL_DELETE_LIKES_BY_FILM_ID, id);
+        update(SQL_DELETE_FILM, id);
+        log.info("Фильм с ID {} удалён из БД", id);
     }
 
     private void insertGenres(Long filmId, List<Genre> genres) {

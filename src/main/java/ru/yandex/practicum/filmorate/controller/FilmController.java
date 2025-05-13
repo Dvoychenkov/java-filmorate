@@ -72,4 +72,10 @@ public class FilmController {
         }
         return java.util.List.of();
     }
+
+    @DeleteMapping("/{filmId}")
+    public void removeFilm(@PathVariable Long filmId) {
+        filmService.removeFilm(filmId);
+        log.info("Фильм с ID {} удалён", filmId);
+    }
 }

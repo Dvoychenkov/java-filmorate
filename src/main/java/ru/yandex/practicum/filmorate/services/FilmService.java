@@ -111,4 +111,8 @@ public class FilmService {
                 .map(filmMapper::mapToFilmDto)
                 .toList();
     }
+    public void removeFilm(Long id) {
+        filmStorage.removeFilm(id);
+        log.info("Фильм с ID {} удалён", id);
+    }
 }

@@ -280,4 +280,16 @@ class FilmDbStorageTest {
         assertThat(directorFilmsSortedByYears.stream().findFirst().orElseThrow().getMpa().getId()).isEqualTo(2);
         assertThat(directorFilmsSortedByYears.stream().skip(1).findFirst().orElseThrow().getMpa().getId()).isEqualTo(1);
     }
+
+    @Test
+    void shouldRemoveFilm() {
+        MpaRating mpa = getRequired(mpaStorage.getById(1L), NOT_FOUND_MPA);
+        Film filmToCreate = generateFilm(mpa);
+        Film createdFilm = filmStorage.add(filmToCreate);
+        Long filmId = createdFilm.getId();
+
+        filmStorage.removeFilm(filmId);
+        Optional<Film> filmFromDb = filmStorage.getById(filmId);
+        assertThat(filmFromDb).isNotPresent();
+    }
 }
