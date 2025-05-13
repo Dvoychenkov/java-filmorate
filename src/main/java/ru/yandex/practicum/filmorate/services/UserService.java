@@ -110,4 +110,9 @@ public class UserService {
         log.info("Получен пользователь по ID {}: {}", id, user);
         return user;
     }
+
+    public void removeUser(Long id) {
+        userStorage.removeUser(id);
+        log.info("Пользователь с ID {} удалён", id);
+    }
 }
