@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 public class NewDirectorRequest {
-    @NotBlank(message = "Имя режиссера")
+    @NotBlank(message = "Пустое имя режиссера")
     private String name;
 }
