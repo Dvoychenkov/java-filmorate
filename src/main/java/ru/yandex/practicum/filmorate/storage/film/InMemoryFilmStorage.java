@@ -76,12 +76,12 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getDirectorFilmsSortedByYears(Long directorId) {
-        return List.of();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Collection<Film> getDirectorFilmsSortedByLikes(Long directorId) {
-        return List.of();
+        throw new UnsupportedOperationException();
     }
 
     @Override
