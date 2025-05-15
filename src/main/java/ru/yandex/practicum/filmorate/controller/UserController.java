@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.UpdateUserRequest;
 import ru.yandex.practicum.filmorate.dto.UserDto;
+import ru.yandex.practicum.filmorate.model.FeedEvent;
+import ru.yandex.practicum.filmorate.services.FeedService;
 import ru.yandex.practicum.filmorate.services.UserService;
 
 import java.util.Collection;
@@ -18,6 +20,7 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final FeedService feedService;
 
     @GetMapping
     public Collection<UserDto> getAll() {
@@ -71,5 +74,11 @@ public class UserController {
     public void removeUser(@PathVariable Long userId) {
         userService.removeUser(userId);
         log.info("Пользователь с ID {} удалён", userId);
+    }
+
+    @GetMapping("/{userId}/feed")
+    public Collection<FeedEvent> getUserFeed(@PathVariable Long userId) {
+        userService.getUserOrThrow(userId); // Проверка на наличие пользователя
+        return feedService.getFeedByUserId(userId);
     }
 }
