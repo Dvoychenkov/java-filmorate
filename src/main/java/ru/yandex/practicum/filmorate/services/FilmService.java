@@ -8,7 +8,10 @@ import ru.yandex.practicum.filmorate.dto.NewFilmRequest;
 import ru.yandex.practicum.filmorate.dto.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
+import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
+import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.Collection;
@@ -20,8 +23,9 @@ import static ru.yandex.practicum.filmorate.validation.ValidationUtils.requireFo
 @Slf4j
 public class FilmService {
     private final FilmStorage filmStorage;
-    private final UserService userService;
     private final FilmMapper filmMapper;
+    private final UserService userService;
+    private final FeedService feedService;
 
     public Collection<FilmDto> getAll() {
         Collection<Film> films = filmStorage.getAll();
@@ -53,6 +57,8 @@ public class FilmService {
 
         boolean added = filmStorage.addLike(filmId, userId);
         if (added) {
+            FeedEvent feedEvent = new FeedEvent(userId, FeedEventType.LIKE, FeedOperation.ADD, filmId);
+            feedService.addEvent(feedEvent);
             log.info("Пользователь {} поставил лайк фильму {}", userId, filmId);
         } else {
             log.info("Пользователь {} уже ставил лайк фильму {}", userId, filmId);
@@ -65,6 +71,8 @@ public class FilmService {
 
         boolean removed = filmStorage.removeLike(filmId, userId);
         if (removed) {
+            FeedEvent feedEvent = new FeedEvent(userId, FeedEventType.LIKE, FeedOperation.REMOVE, filmId);
+            feedService.addEvent(feedEvent);
             log.info("Пользователь {} убрал лайк с фильма {}", userId, filmId);
         } else {
             log.info("Пользователь {} не ставил лайк фильму {}", userId, filmId);
