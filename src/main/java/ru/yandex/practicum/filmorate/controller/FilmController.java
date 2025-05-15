@@ -70,7 +70,7 @@ public class FilmController {
         } else if (sortBy == SortOption.LIKES) {
             return filmService.getTopFilmsByLikes(directorId);
         }
-        return java.util.List.of();
+        throw new UnsupportedOperationException();
     }
 
     @DeleteMapping("/{filmId}")
