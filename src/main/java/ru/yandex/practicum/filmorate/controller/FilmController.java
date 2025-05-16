@@ -73,6 +73,11 @@ public class FilmController {
         throw new UnsupportedOperationException();
     }
 
+    @GetMapping("/common")
+    public Collection<FilmDto> getCommonFilms(@RequestParam Long userId, @RequestParam Long friendId) {
+        return filmService.getCommonFilms(userId, friendId);
+    }
+
     @DeleteMapping("/{filmId}")
     public void removeFilm(@PathVariable Long filmId) {
         filmService.removeFilm(filmId);

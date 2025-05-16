@@ -24,6 +24,8 @@ public interface FilmStorage {
 
     Collection<Film> getDirectorFilmsSortedByLikes(Long directorId);
 
+    Collection<Film> getCommonFilms(Long userId, Long friendId);
+
     void removeFilm(Long id);
 
     Collection<Film> getFilmsRecommendations(Long userId);

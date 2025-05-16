@@ -15,6 +15,7 @@ import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.Collection;
+import java.util.List;
 
 import static ru.yandex.practicum.filmorate.validation.ValidationUtils.requireFound;
 
@@ -118,6 +119,15 @@ public class FilmService {
         return directorFilmsSortedByYears.stream()
                 .map(filmMapper::mapToFilmDto)
                 .toList();
+    }
+
+    public Collection<FilmDto> getCommonFilms(Long userId, Long friendId) {
+        Collection<Film> commonFilms = filmStorage.getCommonFilms(userId, friendId);
+        List<FilmDto> commonFilmsList = commonFilms.stream()
+                .map(filmMapper::mapToFilmDto)
+                .toList();
+        log.info("Общие фильмы для {} и {}: {}", userId, friendId, commonFilmsList);
+        return commonFilmsList;
     }
 
     public void removeFilm(Long id) {

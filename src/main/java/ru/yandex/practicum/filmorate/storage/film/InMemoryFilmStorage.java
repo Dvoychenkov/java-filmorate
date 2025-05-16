@@ -85,6 +85,13 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public Collection<Film> getCommonFilms(Long userId, Long friendId) {
+        return getAll().stream()
+                .filter(film -> film.getLikesUsersIds().contains(userId) && film.getLikesUsersIds().contains(friendId))
+                .toList();
+    }
+
+    @Override
     public void removeFilm(Long id) {
         log.info("Удаление фильма с ID {}", id);
         if (id == null || !films.containsKey(id)) {
