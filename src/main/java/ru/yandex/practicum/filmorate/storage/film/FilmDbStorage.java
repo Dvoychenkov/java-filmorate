@@ -54,6 +54,36 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
     private static final String SQL_DELETE_FILM = "DELETE FROM films WHERE id = ?";
     private static final String SQL_DELETE_LIKES_BY_FILM_ID = "DELETE FROM films_users_likes WHERE film_id = ?";
 
+    // Обработка информации о рекомендациях
+    /**
+     * Запрос для получения рекомендованных фильмов для указанного юзера.
+     * Алгоритм:
+     * 1. Выбираем топ-юзера, у которого больше всего общих лайкнутых фильмов с целевым юзером;
+     * 2. Получаем все фильмы, который лайкнул топ-юзер;
+     * 3. Исключаем те фильмы, которые лайкнул целевой юзер.
+     * Параметр:
+     * userId — используется трижды: для исключения из сравнения, поиска совпадений и исключения уже просмотренного.
+     */
+    private static final String SQL_SELECT_RECOMMENDATIONS = """
+                SELECT * FROM films
+                WHERE id IN (
+                    SELECT film_id FROM films_users_likes
+                    WHERE user_id = (
+                        SELECT user_id FROM films_users_likes
+                        WHERE user_id != ?
+                          AND film_id IN (
+                              SELECT film_id FROM films_users_likes WHERE user_id = ?
+                          )
+                        GROUP BY user_id
+                        ORDER BY COUNT(1) DESC
+                        LIMIT 1
+                    )
+                )
+                AND id NOT IN (
+                    SELECT film_id FROM films_users_likes WHERE user_id = ?
+                );
+            """;
+
 
     // Обработка информации о режиссерах
     private static final String SQL_INSERT_DIRECTOR = "INSERT INTO films_directors (film_id, director_id) VALUES (?, ?)";
@@ -162,6 +192,11 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
         update(SQL_DELETE_LIKES_BY_FILM_ID, id);
         update(SQL_DELETE_FILM, id);
         log.info("Фильм с ID {} удалён из БД", id);
+    }
+
+    @Override
+    public List<Film> getFilmsRecommendations(Long userId) {
+        return queryMany(SQL_SELECT_RECOMMENDATIONS, userId, userId, userId);
     }
 
     private void insertGenres(Long filmId, List<Genre> genres) {

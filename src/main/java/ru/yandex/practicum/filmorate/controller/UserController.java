@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.UpdateUserRequest;
 import ru.yandex.practicum.filmorate.dto.UserDto;
@@ -80,5 +81,10 @@ public class UserController {
     public Collection<FeedEvent> getUserFeed(@PathVariable Long userId) {
         userService.getUserOrThrow(userId); // Проверка на наличие пользователя
         return feedService.getFeedByUserId(userId);
+    }
+
+    @GetMapping("/{userId}/recommendations")
+    public Collection<FilmDto> getRecommendations(@PathVariable Long userId) {
+        return userService.getFilmsRecommendations(userId);
     }
 }

@@ -94,4 +94,9 @@ public class InMemoryFilmStorage implements FilmStorage {
         films.remove(id);
         log.info("Фильм с ID {} удален", id);
     }
+
+    @Override
+    public Collection<Film> getFilmsRecommendations(Long userId) {
+        throw new UnsupportedOperationException();
+    }
 }

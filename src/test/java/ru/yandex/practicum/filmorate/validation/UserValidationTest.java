@@ -9,18 +9,13 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.dto.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.UserDto;
-import ru.yandex.practicum.filmorate.mapper.UserMapper;
-import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.services.FeedService;
-import ru.yandex.practicum.filmorate.services.UserService;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static ru.yandex.practicum.filmorate.util.TestHelper.getUserController;
 
 public class UserValidationTest {
     private Validator validator;
@@ -131,22 +126,6 @@ public class UserValidationTest {
         user.setName(" ");
         createdUser = controller.create(user);
         assertEquals("okLogin", createdUser.getName());
-    }
-
-    private static UserController getUserController() {
-        FeedService feedService = new FeedService() {
-            @Override
-            public void addEvent(FeedEvent event) {
-
-            }
-
-            @Override
-            public Collection<FeedEvent> getFeedByUserId(Long userId) {
-                throw new UnsupportedOperationException();
-            }
-        };
-        UserService userService = new UserService(new InMemoryUserStorage(), feedService, new UserMapper());
-        return new UserController(userService, feedService);
     }
 
     @Test
