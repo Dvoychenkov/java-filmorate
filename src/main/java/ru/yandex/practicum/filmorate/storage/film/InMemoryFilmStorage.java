@@ -72,4 +72,9 @@ public class InMemoryFilmStorage implements FilmStorage {
                 .limit(count)
                 .toList();
     }
+
+    @Override
+    public Collection<Film> getFilmsRecommendations(Long userId) {
+        throw new UnsupportedOperationException();
+    }
 }

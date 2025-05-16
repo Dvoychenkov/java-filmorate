@@ -51,6 +51,36 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
                 LIMIT ?
             """;
 
+    // Обработка информации о рекомендациях
+    /**
+     * Запрос для получения рекомендованных фильмов для указанного юзера.
+     * Алгоритм:
+     * 1. Выбираем топ-юзера, у которого больше всего общих лайкнутых фильмов с целевым юзером;
+     * 2. Получаем все фильмы, который лайкнул топ-юзер;
+     * 3. Исключаем те фильмы, которые лайкнул целевой юзер.
+     * Параметр:
+     * userId — используется трижды: для исключения из сравнения, поиска совпадений и исключения уже просмотренного.
+     */
+    private static final String SQL_SELECT_RECOMMENDATIONS = """
+                SELECT * FROM films
+                WHERE id IN (
+                    SELECT film_id FROM films_users_likes
+                    WHERE user_id = (
+                        SELECT user_id FROM films_users_likes
+                        WHERE user_id != ?
+                          AND film_id IN (
+                              SELECT film_id FROM films_users_likes WHERE user_id = ?
+                          )
+                        GROUP BY user_id
+                        ORDER BY COUNT(1) DESC
+                        LIMIT 1
+                    )
+                )
+                AND id NOT IN (
+                    SELECT film_id FROM films_users_likes WHERE user_id = ?
+                );
+            """;
+
 
     public FilmDbStorage(JdbcTemplate jdbcTemplate, FilmRowMapper filmRowMapper) {
         super(jdbcTemplate, filmRowMapper);
@@ -123,6 +153,11 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
     @Override
     public Collection<Film> getTopFilmsByLikes(int count) {
         return queryMany(SQL_SELECT_TOP_FILMS, count);
+    }
+
+    @Override
+    public List<Film> getFilmsRecommendations(Long userId) {
+        return queryMany(SQL_SELECT_RECOMMENDATIONS, userId, userId, userId);
     }
 
     private void insertGenres(Long filmId, List<Genre> genres) {

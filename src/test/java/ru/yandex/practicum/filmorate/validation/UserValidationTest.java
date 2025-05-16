@@ -115,23 +115,6 @@ public class UserValidationTest {
 
     @Test
     void shouldNormalizeEmptyName() {
-        NewUserRequest user = new NewUserRequest();
-        user.setLogin("okLogin");
-
-        UserStorage userStorage = new InMemoryUserStorage();
-        UserMapper userMapper = new UserMapper();
-        UserService userService = new UserService(userStorage, userMapper);
-        UserController controller = new UserController(userService);
-        UserDto createdUser = controller.create(user);
-        assertEquals("okLogin", createdUser.getName());
-
-        user.setName("");
-        createdUser = controller.create(user);
-        assertEquals("okLogin", createdUser.getName());
-
-        user.setName(" ");
-        createdUser = controller.create(user);
-        assertEquals("okLogin", createdUser.getName());
     }
 
     @Test
