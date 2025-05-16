@@ -104,6 +104,22 @@ public class FilmService {
         return film;
     }
 
+    public Collection<FilmDto> getTopFilmsByLikes(Long directorId) {
+        Collection<Film> directorFilmsSortedByLikes = filmStorage.getDirectorFilmsSortedByLikes(directorId);
+        log.info("ID фильмов: {}", directorFilmsSortedByLikes.stream().map(Film::getId).toList());
+        return directorFilmsSortedByLikes.stream()
+                .map(filmMapper::mapToFilmDto)
+                .toList();
+    }
+
+    public Collection<FilmDto> getTopFilmsByYears(Long directorId) {
+        Collection<Film> directorFilmsSortedByYears = filmStorage.getDirectorFilmsSortedByYears(directorId);
+        log.info("ID фильмов: {}", directorFilmsSortedByYears.stream().map(Film::getId).toList());
+        return directorFilmsSortedByYears.stream()
+                .map(filmMapper::mapToFilmDto)
+                .toList();
+    }
+
     public void removeFilm(Long id) {
         filmStorage.removeFilm(id);
         log.info("Фильм с ID {} удалён", id);
