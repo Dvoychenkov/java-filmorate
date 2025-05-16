@@ -1,10 +1,7 @@
 package ru.yandex.practicum.filmorate.util;
 
 import com.github.javafaker.Faker;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.MpaRating;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -29,11 +26,18 @@ public class TestHelper {
         );
     }
 
-    public static Film generateFilm(MpaRating mpaRating) {
-        return generateFilm(mpaRating, List.of());
+    public static Director generateDirector() {
+        return new Director(
+                null,
+                faker.name().fullName()
+        );
     }
 
-    public static Film generateFilm(MpaRating mpaRating, List<Genre> genres) {
+    public static Film generateFilm(MpaRating mpaRating, List<Director> directors) {
+        return generateFilm(mpaRating, directors, List.of());
+    }
+
+    public static Film generateFilm(MpaRating mpaRating, List<Director> directors, List<Genre> genres) {
         return new Film(
                 null,
                 faker.book().title(),
@@ -41,6 +45,7 @@ public class TestHelper {
                 generatePastDate(),
                 faker.number().numberBetween(60, 180),
                 mpaRating,
+                new ArrayList<>(directors),
                 new ArrayList<>(genres),
                 new HashSet<>()
         );

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.base.BaseCRUDRepository;
@@ -50,6 +51,8 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
                 ORDER BY COUNT(l.user_id) DESC
                 LIMIT ?
             """;
+    private static final String SQL_DELETE_FILM = "DELETE FROM films WHERE id = ?";
+    private static final String SQL_DELETE_LIKES_BY_FILM_ID = "DELETE FROM films_users_likes WHERE film_id = ?";
 
     // Обработка информации о рекомендациях
     /**
@@ -82,6 +85,21 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
             """;
 
 
+    // Обработка информации о режиссерах
+    private static final String SQL_INSERT_DIRECTOR = "INSERT INTO films_directors (film_id, director_id) VALUES (?, ?)";
+    private static final String SQL_DELETE_DIRECTORS_BY_FILM_ID = "DELETE FROM films_directors WHERE film_id = ?";
+
+    private static final String SQL_DIRECTOR_FILMS_YEARS = "SELECT * FROM films f JOIN films_directors fd ON (f.id = fd.film_id) WHERE fd.director_id = ? ORDER BY release_date";
+    private static final String SQL_DIRECTOR_FILMS_LIKES = """
+                SELECT f.*
+                FROM films f
+                JOIN films_directors fd ON f.id = fd.film_id
+                LEFT JOIN films_users_likes l ON f.id = l.film_id
+                WHERE fd.director_id = ?
+                GROUP BY f.id
+                ORDER BY COUNT(l.user_id) DESC
+            """;
+
     public FilmDbStorage(JdbcTemplate jdbcTemplate, FilmRowMapper filmRowMapper) {
         super(jdbcTemplate, filmRowMapper);
     }
@@ -105,6 +123,7 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
         film.setId(id);
 
         insertGenres(id, film.getGenres());
+        insertDirectors(id, film.getDirectors());
 
         log.info("Фильм добавлен в БД: {}", film);
         return film;
@@ -122,7 +141,9 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
         );
 
         deleteGenres(film.getId());
+        deleteDirectors(film.getId());
         insertGenres(film.getId(), film.getGenres());
+        insertDirectors(film.getId(), film.getDirectors());
 
         log.info("Фильм обновлён в БД: {}", film);
         return film;
@@ -156,6 +177,24 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
     }
 
     @Override
+    public Collection<Film> getDirectorFilmsSortedByYears(Long directorId) {
+        return queryMany(SQL_DIRECTOR_FILMS_YEARS, directorId);
+    }
+
+    @Override
+    public Collection<Film> getDirectorFilmsSortedByLikes(Long directorId) {
+        return queryMany(SQL_DIRECTOR_FILMS_LIKES, directorId);
+    }
+
+    @Override
+    public void removeFilm(Long id) {
+        update(SQL_DELETE_GENRES_BY_FILM_ID, id);
+        update(SQL_DELETE_LIKES_BY_FILM_ID, id);
+        update(SQL_DELETE_FILM, id);
+        log.info("Фильм с ID {} удалён из БД", id);
+    }
+
+    @Override
     public List<Film> getFilmsRecommendations(Long userId) {
         return queryMany(SQL_SELECT_RECOMMENDATIONS, userId, userId, userId);
     }
@@ -168,7 +207,19 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
                 .forEach(genre -> update(SQL_INSERT_GENRE, filmId, genre.getId()));
     }
 
+    private void insertDirectors(Long filmId, List<Director> directors) {
+        if (directors == null) return;
+        directors.stream()
+                .filter(g -> g.getId() != null)
+                .distinct()
+                .forEach(director -> update(SQL_INSERT_DIRECTOR, filmId, director.getId()));
+    }
+
     private void deleteGenres(Long filmId) {
         update(SQL_DELETE_GENRES_BY_FILM_ID, filmId);
+    }
+
+    private void deleteDirectors(Long filmId) {
+        update(SQL_DELETE_DIRECTORS_BY_FILM_ID, filmId);
     }
 }

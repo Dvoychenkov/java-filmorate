@@ -143,4 +143,26 @@ class UserDbStorageTest {
                 .extracting(User::getId)
                 .containsExactly(u3.getId());
     }
+
+    @Test
+    void shouldRemoveUser() {
+        User u1 = userStorage.add(generateUser());
+        User u2 = userStorage.add(generateUser());
+
+        userStorage.addFriend(u1.getId(), u2.getId());
+        userStorage.addFriend(u2.getId(), u1.getId());
+
+        Optional<User> addedUser = userStorage.getById(u1.getId());
+        assertThat(addedUser).isPresent();
+
+        userStorage.removeUser(u1.getId());
+
+        Optional<User> afterRemove = userStorage.getById(u1.getId());
+        assertThat(afterRemove).isNotPresent();
+
+        Collection<User> friendsOfU2 = userStorage.getFriends(u2.getId());
+        assertThat(friendsOfU2)
+                .extracting(User::getId)
+                .doesNotContain(u1.getId());
+    }
 }

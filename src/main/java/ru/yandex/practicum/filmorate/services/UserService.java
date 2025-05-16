@@ -10,8 +10,11 @@ import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
+import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
+import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.model.enums.FriendshipAddResult;
 import ru.yandex.practicum.filmorate.model.enums.FriendshipRemoveResult;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -29,6 +32,7 @@ public class UserService {
     private final FilmStorage filmStorage;
     private final UserMapper userMapper;
     private final FilmMapper filmMapper;
+    private final FeedService feedService;
 
     public Collection<UserDto> getAll() {
         Collection<User> users = userStorage.getAll();
@@ -60,9 +64,17 @@ public class UserService {
 
         FriendshipAddResult friendshipAddResult = userStorage.addFriend(userId, friendId);
         switch (friendshipAddResult) {
-            case FRIEND_REQUEST_ADDED -> log.info("Отправлена новая заявка в друзья от {} к {}", userId, friendId);
+            case FRIEND_REQUEST_ADDED -> {
+                FeedEvent feedEvent = new FeedEvent(userId, FeedEventType.FRIEND, FeedOperation.ADD, friendId);
+                feedService.addEvent(feedEvent);
+                log.info("Отправлена новая заявка в друзья от {} к {}", userId, friendId);
+            }
             case FRIEND_REQUEST_ALREADY_EXISTS -> log.info("Заявка в друзья уже была от {} к {}", userId, friendId);
-            case FRIENDSHIP_CONFIRMED -> log.info("Дружба подтверждена между {} и {}", userId, friendId);
+            case FRIENDSHIP_CONFIRMED -> {
+                FeedEvent feedEvent = new FeedEvent(userId, FeedEventType.FRIEND, FeedOperation.ADD, friendId);
+                feedService.addEvent(feedEvent);
+                log.info("Дружба подтверждена между {} и {}", userId, friendId);
+            }
             case FRIENDSHIP_ALREADY_EXISTS -> log.info("Дружба уже существует между {} и {}", userId, friendId);
             case UNKNOWN -> log.info("Неизвестное состояние создания дружбы между {} и {}", userId, friendId);
         }
@@ -74,8 +86,16 @@ public class UserService {
 
         FriendshipRemoveResult friendshipRemoveResult = userStorage.removeFriend(userId, friendId);
         switch (friendshipRemoveResult) {
-            case CONFIRMED_FRIENDSHIP_REMOVED -> log.info("Дружба отменена от {} к {}", userId, friendId);
-            case FRIEND_REQUEST_REMOVED -> log.info("Заявка отменена от {} к {}", userId, friendId);
+            case CONFIRMED_FRIENDSHIP_REMOVED -> {
+                FeedEvent feedEvent = new FeedEvent(userId, FeedEventType.FRIEND, FeedOperation.REMOVE, friendId);
+                feedService.addEvent(feedEvent);
+                log.info("Дружба отменена от {} к {}", userId, friendId);
+            }
+            case FRIEND_REQUEST_REMOVED -> {
+                FeedEvent feedEvent = new FeedEvent(userId, FeedEventType.FRIEND, FeedOperation.REMOVE, friendId);
+                feedService.addEvent(feedEvent);
+                log.info("Заявка отменена от {} к {}", userId, friendId);
+            }
             case NO_FRIENDSHIP -> log.info("Дружбы/заявки не было от {} к {}", userId, friendId);
             case UNKNOWN -> log.info("Неизвестное состояние разрыва дружбы между {} и {}", userId, friendId);
         }
@@ -124,5 +144,10 @@ public class UserService {
         User user = requireFound(userStorage.getById(id), () -> "Пользователь с ID " + id + " не найден");
         log.info("Получен пользователь по ID {}: {}", id, user);
         return user;
+    }
+
+    public void removeUser(Long id) {
+        userStorage.removeUser(id);
+        log.info("Пользователь с ID {} удалён", id);
     }
 }

@@ -6,9 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MpaRating;
+import ru.yandex.practicum.filmorate.storage.director.DirectorDbStorage;
+import ru.yandex.practicum.filmorate.storage.director.DirectorRowMapper;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmRowMapper;
 import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
@@ -16,6 +19,7 @@ import ru.yandex.practicum.filmorate.storage.genre.GenreRowMapper;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaRatingDbStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaRatingRowMapper;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -29,11 +33,13 @@ import static ru.yandex.practicum.filmorate.util.TestHelper.*;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Import({GenreDbStorage.class, GenreRowMapper.class,
         FilmDbStorage.class, FilmRowMapper.class,
-        MpaRatingDbStorage.class, MpaRatingRowMapper.class})
+        MpaRatingDbStorage.class, MpaRatingRowMapper.class,
+        DirectorDbStorage.class, DirectorRowMapper.class})
 class GenreDbStorageTest {
     private final MpaRatingDbStorage mpaStorage;
     private final FilmDbStorage filmStorage;
     private final GenreDbStorage genreStorage;
+    private final DirectorDbStorage directorStorage;
 
     @Test
     void shouldReturnAllGenres() {
@@ -63,12 +69,16 @@ class GenreDbStorageTest {
 
     @Test
     void shouldReturnGenresByFilmId() {
+        Director directorToCreate = generateDirector();
+        Director createdDirector = directorStorage.add(directorToCreate);
+        List<Director> directors = new ArrayList<>();
+        directors.add(createdDirector);
         MpaRating mpaCreate = getRequired(mpaStorage.getById(1L), NOT_FOUND_MPA);
         List<Genre> genresCreate = List.of(
                 getRequired(genreStorage.getById(1L), NOT_FOUND_GENRE),
                 getRequired(genreStorage.getById(6L), NOT_FOUND_GENRE)
         );
-        Film filmToCreate = generateFilm(mpaCreate, genresCreate);
+        Film filmToCreate = generateFilm(mpaCreate, directors, genresCreate);
         Film createdFilm = filmStorage.add(filmToCreate);
 
         Collection<Genre> genresOfFilm = genreStorage.getByFilmId(createdFilm.getId());
