@@ -9,18 +9,25 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.dto.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.UserDto;
+import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
-import ru.yandex.practicum.filmorate.model.FeedEvent;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.services.FeedService;
 import ru.yandex.practicum.filmorate.services.UserService;
+import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.mpa.MpaRatingStorage;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static ru.yandex.practicum.filmorate.util.TestHelper.getUserController;
 
 public class UserValidationTest {
     private Validator validator;
@@ -131,22 +138,6 @@ public class UserValidationTest {
         user.setName(" ");
         createdUser = controller.create(user);
         assertEquals("okLogin", createdUser.getName());
-    }
-
-    private static UserController getUserController() {
-        FeedService feedService = new FeedService() {
-            @Override
-            public void addEvent(FeedEvent event) {
-
-            }
-
-            @Override
-            public Collection<FeedEvent> getFeedByUserId(Long userId) {
-                throw new UnsupportedOperationException();
-            }
-        };
-        UserService userService = new UserService(new InMemoryUserStorage(), feedService, new UserMapper());
-        return new UserController(userService, feedService);
     }
 
     @Test
