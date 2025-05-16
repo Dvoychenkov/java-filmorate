@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.services.RecommendationService;
 
-import java.sql.SQLException;
 import java.util.List;
 
 @RestController
@@ -16,7 +15,7 @@ public class RecommendationController {
     private final RecommendationService recommendationService;
 
     @GetMapping("/users/{id}/recommendations")
-    public List<Film> getRecommendations(@PathVariable Long id) throws SQLException {
+    public List<Film> getRecommendations(@PathVariable Long id) {
         return recommendationService.getRecommendations(id);
     }
 }
