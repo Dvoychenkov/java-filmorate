@@ -20,6 +20,10 @@ public interface FilmStorage {
 
     Collection<Film> getTopFilmsByLikes(int count);
 
+    Collection<Film> getDirectorFilmsSortedByYears(Long directorId);
+
+    Collection<Film> getDirectorFilmsSortedByLikes(Long directorId);
+
     void removeFilm(Long id);
 
 }

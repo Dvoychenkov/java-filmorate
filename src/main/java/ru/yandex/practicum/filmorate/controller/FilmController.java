@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.NewFilmRequest;
 import ru.yandex.practicum.filmorate.dto.UpdateFilmRequest;
+import ru.yandex.practicum.filmorate.model.enums.SortOption;
 import ru.yandex.practicum.filmorate.services.FilmService;
 
 import java.util.Collection;
@@ -60,6 +61,16 @@ public class FilmController {
     @GetMapping("/popular")
     public Collection<FilmDto> getPopular(@RequestParam(defaultValue = "10") int count) {
         return filmService.getTopFilmsByLikes(count);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public Collection<FilmDto> getDirectorFilms(@PathVariable Long directorId, @RequestParam SortOption sortBy) {
+        if (sortBy == SortOption.YEAR) {
+            return filmService.getTopFilmsByYears(directorId);
+        } else if (sortBy == SortOption.LIKES) {
+            return filmService.getTopFilmsByLikes(directorId);
+        }
+        throw new UnsupportedOperationException();
     }
 
     @DeleteMapping("/{filmId}")

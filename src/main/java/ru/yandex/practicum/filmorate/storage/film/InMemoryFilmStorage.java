@@ -75,6 +75,16 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public Collection<Film> getDirectorFilmsSortedByYears(Long directorId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Collection<Film> getDirectorFilmsSortedByLikes(Long directorId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void removeFilm(Long id) {
         log.info("Удаление фильма с ID {}", id);
         if (id == null || !films.containsKey(id)) {
