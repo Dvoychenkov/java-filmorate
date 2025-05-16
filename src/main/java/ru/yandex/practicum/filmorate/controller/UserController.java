@@ -82,7 +82,7 @@ public class UserController {
         userService.getUserOrThrow(userId); // Проверка на наличие пользователя
         return feedService.getFeedByUserId(userId);
     }
-    
+
     @GetMapping("/{userId}/recommendations")
     public Collection<FilmDto> getRecommendations(@PathVariable Long userId) {
         return userService.getFilmsRecommendations(userId);
