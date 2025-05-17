@@ -65,7 +65,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> getTopFilmsByLikes(int count) {
+    public Collection<Film> getTopFilmsByLikes(int count, Integer genreId, Integer year) {
         Comparator<Film> filmTopByLikesComparator = Comparator.comparingInt(Film::getLikesUsersIdsSize).reversed();
         return getAll().stream()
                 .filter(Objects::nonNull)

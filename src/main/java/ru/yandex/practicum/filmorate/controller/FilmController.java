@@ -59,16 +59,18 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public Collection<FilmDto> getPopular(@RequestParam(defaultValue = "10") int count) {
-        return filmService.getTopFilmsByLikes(count);
+    public Collection<FilmDto> getPopular(@RequestParam(defaultValue = "10") int count,
+                                          @RequestParam(name = "genreId", required = false) Integer genreId,
+                                          @RequestParam(name = "year", required = false) Integer year) {
+        return filmService.getTopFilmsByLikes(count, genreId, year);
     }
 
     @GetMapping("/director/{directorId}")
     public Collection<FilmDto> getDirectorFilms(@PathVariable Long directorId, @RequestParam SortOption sortBy) {
         if (sortBy == SortOption.YEAR) {
-            return filmService.getTopFilmsByYears(directorId);
+            return filmService.getDirectorFilmsSortedByYears(directorId);
         } else if (sortBy == SortOption.LIKES) {
-            return filmService.getTopFilmsByLikes(directorId);
+            return filmService.getDirectorFilmsSortedByLikes(directorId);
         }
         throw new UnsupportedOperationException();
     }

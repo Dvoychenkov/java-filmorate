@@ -15,7 +15,6 @@ import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.Collection;
-import java.util.List;
 
 import static ru.yandex.practicum.filmorate.validation.ValidationUtils.requireFound;
 
@@ -27,6 +26,7 @@ public class FilmService {
     private final FilmMapper filmMapper;
     private final UserService userService;
     private final FeedService feedService;
+    private final DirectorService directorService;
 
     public Collection<FilmDto> getAll() {
         Collection<Film> films = filmStorage.getAll();
@@ -80,13 +80,13 @@ public class FilmService {
         }
     }
 
-    public Collection<FilmDto> getTopFilmsByLikes(int filmsLimit) {
+    public Collection<FilmDto> getTopFilmsByLikes(int filmsLimit, Integer genreId, Integer year) {
         if (filmsLimit <= 0) {
             log.warn("Передан некорректный параметр count = {}, используется значение по умолчанию", filmsLimit);
             filmsLimit = 10;
         }
 
-        Collection<Film> top = filmStorage.getTopFilmsByLikes(filmsLimit);
+        Collection<Film> top = filmStorage.getTopFilmsByLikes(filmsLimit, genreId, year);
         log.info("Возвращён топ {} фильмов по лайкам", top.size());
         log.info("ID фильмов из топа: {}", top.stream().map(Film::getId).toList());
         return top.stream()
@@ -105,17 +105,19 @@ public class FilmService {
         return film;
     }
 
-    public Collection<FilmDto> getTopFilmsByLikes(Long directorId) {
+    public Collection<FilmDto> getDirectorFilmsSortedByLikes(Long directorId) {
+        directorService.getDirectorOrThrow(directorId);
         Collection<Film> directorFilmsSortedByLikes = filmStorage.getDirectorFilmsSortedByLikes(directorId);
-        log.info("Топ ID фильмов по лайкам: {}", directorFilmsSortedByLikes.stream().map(Film::getId).toList());
+        log.info("ID фильмов режиссера по лайкам: {}", directorFilmsSortedByLikes.stream().map(Film::getId).toList());
         return directorFilmsSortedByLikes.stream()
                 .map(filmMapper::mapToFilmDto)
                 .toList();
     }
 
-    public Collection<FilmDto> getTopFilmsByYears(Long directorId) {
+    public Collection<FilmDto> getDirectorFilmsSortedByYears(Long directorId) {
+        directorService.getDirectorOrThrow(directorId);
         Collection<Film> directorFilmsSortedByYears = filmStorage.getDirectorFilmsSortedByYears(directorId);
-        log.info("Топ ID фильмов по годам: {}", directorFilmsSortedByYears.stream().map(Film::getId).toList());
+        log.info("ID фильмов режиссера по годам: {}", directorFilmsSortedByYears.stream().map(Film::getId).toList());
         return directorFilmsSortedByYears.stream()
                 .map(filmMapper::mapToFilmDto)
                 .toList();
@@ -126,7 +128,7 @@ public class FilmService {
         userService.getUserOrThrow(friendId); // Проверка на наличие друга
 
         Collection<Film> commonFilms = filmStorage.getCommonFilms(userId, friendId);
-        List<FilmDto> commonFilmsList = commonFilms.stream()
+        Collection<FilmDto> commonFilmsList = commonFilms.stream()
                 .map(filmMapper::mapToFilmDto)
                 .toList();
         log.info("Общие фильмы для {} и {}: {}", userId, friendId, commonFilmsList);

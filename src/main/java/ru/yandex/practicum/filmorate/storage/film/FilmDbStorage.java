@@ -114,6 +114,36 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
                 GROUP BY f.id
                 ORDER BY likes_count DESC;
             """;
+    private static final String SQL_SELECT_TOP_FILMS_BY_GENRE = """
+                 SELECT f.*
+                 FROM films f
+                 JOIN films_genres fg ON f.id = fg.film_id
+                 LEFT JOIN films_users_likes l ON f.id = l.film_id
+                 WHERE fg.genre_id = ?
+                 GROUP BY f.id
+                 ORDER BY COUNT(l.user_id) DESC
+                 LIMIT ?
+             """;
+    private static final String SQL_SELECT_TOP_FILMS_BY_YEAR = """
+                 SELECT f.*
+                 FROM films f
+                 LEFT JOIN films_users_likes l ON f.id = l.film_id
+                 WHERE EXTRACT(YEAR FROM release_date) = ?
+                 GROUP BY f.id
+                 ORDER BY COUNT(l.user_id) DESC
+                 LIMIT ?
+             """;
+    private static final String SQL_SELECT_TOP_FILMS_BY_GENRE_AND_YEAR = """
+                 SELECT f.*
+                 FROM films f
+                 JOIN films_genres fg ON f.id = fg.film_id
+                 LEFT JOIN films_users_likes l ON f.id = l.film_id
+                 WHERE EXTRACT(YEAR FROM release_date) = ?
+                 AND fg.genre_id = ?
+                 GROUP BY f.id
+                 ORDER BY COUNT(l.user_id) DESC
+                 LIMIT ?
+             """;
 
     public FilmDbStorage(JdbcTemplate jdbcTemplate, FilmRowMapper filmRowMapper) {
         super(jdbcTemplate, filmRowMapper);
@@ -187,8 +217,19 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
     }
 
     @Override
-    public Collection<Film> getTopFilmsByLikes(int count) {
-        return queryMany(SQL_SELECT_TOP_FILMS, count);
+    public Collection<Film> getTopFilmsByLikes(int count, Integer genreId, Integer year) {
+        List<Film> result;
+
+        if (genreId != null && year != null) {
+            result = queryMany(SQL_SELECT_TOP_FILMS_BY_GENRE_AND_YEAR, year, genreId, count);
+        } else if (genreId != null) {
+            result = queryMany(SQL_SELECT_TOP_FILMS_BY_GENRE, genreId, count);
+        } else if (year != null) {
+            result = queryMany(SQL_SELECT_TOP_FILMS_BY_YEAR, year, count);
+        } else {
+            result = queryMany(SQL_SELECT_TOP_FILMS, count);
+        }
+        return result;
     }
 
     @Override
