@@ -15,7 +15,7 @@ import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.stream.Collectors;
 
 import static ru.yandex.practicum.filmorate.validation.ValidationUtils.requireFound;
 
@@ -80,13 +80,13 @@ public class FilmService {
         }
     }
 
-    public Collection<FilmDto> getTopFilmsByLikes(int filmsLimit, Integer genreId, Integer year) {
+    public Collection<FilmDto> getTopFilmsByLikes(int filmsLimit) {
         if (filmsLimit <= 0) {
             log.warn("Передан некорректный параметр count = {}, используется значение по умолчанию", filmsLimit);
             filmsLimit = 10;
         }
 
-        Collection<Film> top = filmStorage.getTopFilmsByLikes(filmsLimit, genreId, year);
+        Collection<Film> top = filmStorage.getTopFilmsByLikes(filmsLimit);
         log.info("Возвращён топ {} фильмов по лайкам", top.size());
         log.info("ID фильмов из топа: {}", top.stream().map(Film::getId).toList());
         return top.stream()
@@ -126,7 +126,7 @@ public class FilmService {
         userService.getUserOrThrow(friendId); // Проверка на наличие друга
 
         Collection<Film> commonFilms = filmStorage.getCommonFilms(userId, friendId);
-        List<FilmDto> commonFilmsList = commonFilms.stream()
+        Collection<FilmDto> commonFilmsList = commonFilms.stream()
                 .map(filmMapper::mapToFilmDto)
                 .toList();
         log.info("Общие фильмы для {} и {}: {}", userId, friendId, commonFilmsList);
