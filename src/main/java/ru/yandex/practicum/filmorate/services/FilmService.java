@@ -26,6 +26,7 @@ public class FilmService {
     private final FilmMapper filmMapper;
     private final UserService userService;
     private final FeedService feedService;
+    private final DirectorService directorService;
 
     public Collection<FilmDto> getAll() {
         Collection<Film> films = filmStorage.getAll();
@@ -105,16 +106,18 @@ public class FilmService {
     }
 
     public Collection<FilmDto> getDirectorFilmsSortedByLikes(Long directorId) {
+        directorService.getDirectorOrThrow(directorId);
         Collection<Film> directorFilmsSortedByLikes = filmStorage.getDirectorFilmsSortedByLikes(directorId);
-        log.info("ID фильмов: {}", directorFilmsSortedByLikes.stream().map(Film::getId).toList());
+        log.info("ID фильмов режиссера по лайкам: {}", directorFilmsSortedByLikes.stream().map(Film::getId).toList());
         return directorFilmsSortedByLikes.stream()
                 .map(filmMapper::mapToFilmDto)
                 .toList();
     }
 
     public Collection<FilmDto> getDirectorFilmsSortedByYears(Long directorId) {
+        directorService.getDirectorOrThrow(directorId);
         Collection<Film> directorFilmsSortedByYears = filmStorage.getDirectorFilmsSortedByYears(directorId);
-        log.info("ID фильмов: {}", directorFilmsSortedByYears.stream().map(Film::getId).toList());
+        log.info("ID фильмов режиссера по годам: {}", directorFilmsSortedByYears.stream().map(Film::getId).toList());
         return directorFilmsSortedByYears.stream()
                 .map(filmMapper::mapToFilmDto)
                 .toList();
