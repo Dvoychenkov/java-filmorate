@@ -15,6 +15,7 @@ import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.Collection;
+import java.util.List;
 
 import static ru.yandex.practicum.filmorate.validation.ValidationUtils.requireFound;
 
@@ -106,7 +107,7 @@ public class FilmService {
 
     public Collection<FilmDto> getTopFilmsByLikes(Long directorId) {
         Collection<Film> directorFilmsSortedByLikes = filmStorage.getDirectorFilmsSortedByLikes(directorId);
-        log.info("ID фильмов: {}", directorFilmsSortedByLikes.stream().map(Film::getId).toList());
+        log.info("Топ ID фильмов по лайкам: {}", directorFilmsSortedByLikes.stream().map(Film::getId).toList());
         return directorFilmsSortedByLikes.stream()
                 .map(filmMapper::mapToFilmDto)
                 .toList();
@@ -114,10 +115,22 @@ public class FilmService {
 
     public Collection<FilmDto> getTopFilmsByYears(Long directorId) {
         Collection<Film> directorFilmsSortedByYears = filmStorage.getDirectorFilmsSortedByYears(directorId);
-        log.info("ID фильмов: {}", directorFilmsSortedByYears.stream().map(Film::getId).toList());
+        log.info("Топ ID фильмов по годам: {}", directorFilmsSortedByYears.stream().map(Film::getId).toList());
         return directorFilmsSortedByYears.stream()
                 .map(filmMapper::mapToFilmDto)
                 .toList();
+    }
+
+    public Collection<FilmDto> getCommonFilms(Long userId, Long friendId) {
+        userService.getUserOrThrow(userId); // Проверка на наличие пользователя
+        userService.getUserOrThrow(friendId); // Проверка на наличие друга
+
+        Collection<Film> commonFilms = filmStorage.getCommonFilms(userId, friendId);
+        List<FilmDto> commonFilmsList = commonFilms.stream()
+                .map(filmMapper::mapToFilmDto)
+                .toList();
+        log.info("Общие фильмы для {} и {}: {}", userId, friendId, commonFilmsList);
+        return commonFilmsList;
     }
 
     public void removeFilm(Long id) {

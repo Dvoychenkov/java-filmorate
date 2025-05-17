@@ -100,6 +100,21 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
                 ORDER BY COUNT(l.user_id) DESC
             """;
 
+    // Обработка информации о фильмах
+    /**
+     * Запрос для получения фильмов, которые лайкнули и userId, и friendId,
+     * отсортированных по общему количеству лайков (популярности).
+     */
+    private static final String SQL_SELECT_COMMON_FILMS_POPULAR_BY_LIKES = """
+                SELECT f.*, COUNT(ful3.film_id) AS likes_count
+                FROM films f
+                JOIN films_users_likes ful1 ON f.id = ful1.film_id AND ful1.user_id = ?
+                JOIN films_users_likes ful2 ON f.id = ful2.film_id AND ful2.user_id = ?
+                LEFT JOIN films_users_likes ful3 ON f.id = ful3.film_id
+                GROUP BY f.id
+                ORDER BY likes_count DESC;
+            """;
+
     public FilmDbStorage(JdbcTemplate jdbcTemplate, FilmRowMapper filmRowMapper) {
         super(jdbcTemplate, filmRowMapper);
     }
@@ -184,6 +199,11 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
     @Override
     public Collection<Film> getDirectorFilmsSortedByLikes(Long directorId) {
         return queryMany(SQL_DIRECTOR_FILMS_LIKES, directorId);
+    }
+
+    @Override
+    public Collection<Film> getCommonFilms(Long userId, Long friendId) {
+        return queryMany(SQL_SELECT_COMMON_FILMS_POPULAR_BY_LIKES, userId, friendId);
     }
 
     @Override
