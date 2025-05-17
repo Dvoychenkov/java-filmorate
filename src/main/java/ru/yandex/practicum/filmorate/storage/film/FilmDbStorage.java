@@ -131,6 +131,21 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
                  LIMIT ?
              """;
 
+    // Обработка информации о фильмах
+    /**
+     * Запрос для получения фильмов, которые лайкнули и userId, и friendId,
+     * отсортированных по общему количеству лайков (популярности).
+     */
+    private static final String SQL_SELECT_COMMON_FILMS_POPULAR_BY_LIKES = """
+                SELECT f.*, COUNT(ful3.film_id) AS likes_count
+                FROM films f
+                JOIN films_users_likes ful1 ON f.id = ful1.film_id AND ful1.user_id = ?
+                JOIN films_users_likes ful2 ON f.id = ful2.film_id AND ful2.user_id = ?
+                LEFT JOIN films_users_likes ful3 ON f.id = ful3.film_id
+                GROUP BY f.id
+                ORDER BY likes_count DESC;
+            """;
+
     public FilmDbStorage(JdbcTemplate jdbcTemplate, FilmRowMapper filmRowMapper) {
         super(jdbcTemplate, filmRowMapper);
     }
@@ -203,19 +218,8 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
     }
 
     @Override
-    public Collection<Film> getTopFilmsByLikes(int count, Integer genreId, Integer year) {
-        List<Film> result;
-
-        if (genreId != null && year != null) {
-            result = queryMany(SQL_SELECT_TOP_FILMS_BY_GENRE_AND_YEAR, year, genreId, count);
-        } else if (genreId != null) {
-            result = queryMany(SQL_SELECT_TOP_FILMS_BY_GENRE, genreId, count);
-        } else if (year != null) {
-            result = queryMany(SQL_SELECT_TOP_FILMS_BY_YEAR, year, count);
-        } else {
-            result = queryMany(SQL_SELECT_TOP_FILMS, count);
-        }
-        return result;
+    public Collection<Film> getTopFilmsByLikes(int count) {
+        return queryMany(SQL_SELECT_TOP_FILMS, count);
     }
 
     @Override

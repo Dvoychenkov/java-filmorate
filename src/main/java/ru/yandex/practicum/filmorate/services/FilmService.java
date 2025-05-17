@@ -15,7 +15,6 @@ import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 import static ru.yandex.practicum.filmorate.validation.ValidationUtils.requireFound;
 
@@ -80,6 +79,20 @@ public class FilmService {
         }
     }
 
+    public Collection<FilmDto> getTopFilmsByLikes(int filmsLimit) {
+        if (filmsLimit <= 0) {
+            log.warn("Передан некорректный параметр count = {}, используется значение по умолчанию", filmsLimit);
+            filmsLimit = 10;
+        }
+
+        Collection<Film> top = filmStorage.getTopFilmsByLikes(filmsLimit);
+        log.info("Возвращён топ {} фильмов по лайкам", top.size());
+        log.info("ID фильмов из топа: {}", top.stream().map(Film::getId).toList());
+        return top.stream()
+                .map(filmMapper::mapToFilmDto)
+                .toList();
+    }
+
     public FilmDto getFilm(Long id) {
         return filmMapper.mapToFilmDto(getFilmOrThrow(id));
     }
@@ -91,30 +104,10 @@ public class FilmService {
         return film;
     }
 
-    public Collection<FilmDto> getTopFilmsByLikes(int filmsLimit, Integer genreId, Integer year) {
-        if (filmsLimit <= 0) {
-            log.warn("Передан некорректный параметр count = {}, используется значение по умолчанию", filmsLimit);
-            filmsLimit = 10;
-        }
-
-        Collection<Film> top = filmStorage.getTopFilmsByLikes(filmsLimit, genreId, year);
-        log.info("Возвращён топ {} фильмов по лайкам", top.size());
-        log.info("ID фильмов из топа: {}", top.stream().map(Film::getId).toList());
-        return top.stream().map(filmMapper::mapToFilmDto).collect(Collectors.toList());
-    }
-
-    public Collection<FilmDto> getDirectorFilmsSortedByLikes(Long directorId) {
+    public Collection<FilmDto> getTopFilmsByLikes(Long directorId) {
         Collection<Film> directorFilmsSortedByLikes = filmStorage.getDirectorFilmsSortedByLikes(directorId);
         log.info("ID фильмов: {}", directorFilmsSortedByLikes.stream().map(Film::getId).toList());
         return directorFilmsSortedByLikes.stream()
-                .map(filmMapper::mapToFilmDto)
-                .toList();
-    }
-
-    public Collection<FilmDto> getDirectorFilmsSortedByYears(Long directorId) {
-        Collection<Film> directorFilmsSortedByYears = filmStorage.getDirectorFilmsSortedByYears(directorId);
-        log.info("ID фильмов: {}", directorFilmsSortedByYears.stream().map(Film::getId).toList());
-        return directorFilmsSortedByYears.stream()
                 .map(filmMapper::mapToFilmDto)
                 .toList();
     }
