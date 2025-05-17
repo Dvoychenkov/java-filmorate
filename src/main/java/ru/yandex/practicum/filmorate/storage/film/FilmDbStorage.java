@@ -218,8 +218,19 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
     }
 
     @Override
-    public Collection<Film> getTopFilmsByLikes(int count) {
-        return queryMany(SQL_SELECT_TOP_FILMS, count);
+    public Collection<Film> getTopFilmsByLikes(int count, Integer genreId, Integer year) {
+        List<Film> result;
+
+        if (genreId != null && year != null) {
+            result = queryMany(SQL_SELECT_TOP_FILMS_BY_GENRE_AND_YEAR, year, genreId, count);
+        } else if (genreId != null) {
+            result = queryMany(SQL_SELECT_TOP_FILMS_BY_GENRE, genreId, count);
+        } else if (year != null) {
+            result = queryMany(SQL_SELECT_TOP_FILMS_BY_YEAR, year, count);
+        } else {
+            result = queryMany(SQL_SELECT_TOP_FILMS, count);
+        }
+        return result;
     }
 
     @Override
@@ -230,6 +241,11 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
     @Override
     public Collection<Film> getDirectorFilmsSortedByLikes(Long directorId) {
         return queryMany(SQL_DIRECTOR_FILMS_LIKES, directorId);
+    }
+
+    @Override
+    public Collection<Film> getCommonFilms(Long userId, Long friendId) {
+        return queryMany(SQL_SELECT_COMMON_FILMS_POPULAR_BY_LIKES, userId, friendId);
     }
 
     @Override
