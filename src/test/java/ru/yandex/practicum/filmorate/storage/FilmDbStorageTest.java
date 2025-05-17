@@ -171,7 +171,7 @@ class FilmDbStorageTest {
 
         // Получаем топ-5
         int topCnt = 5;
-        Collection<Film> top = filmStorage.getTopFilmsByLikes(topCnt);
+        Collection<Film> top = filmStorage.getTopFilmsByLikes(topCnt, null, null);
         assertThat(top.size()).isEqualTo(topCnt);
 
         // Ожидаем 5 фильмов с конца, получаем их id
