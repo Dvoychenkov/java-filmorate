@@ -84,10 +84,13 @@ public class InMemoryFilmStorage implements FilmStorage {
         throw new UnsupportedOperationException();
     }
 
+    // TODO улучшим?
     @Override
     public Collection<Film> getCommonFilms(Long userId, Long friendId) {
         return getAll().stream()
+                .filter(Objects::nonNull)
                 .filter(film -> film.getLikesUsersIds().contains(userId) && film.getLikesUsersIds().contains(friendId))
+                .sorted((film1, film2) -> Integer.compare(film2.getLikesUsersIds().size(), film1.getLikesUsersIds().size()))
                 .toList();
     }
 
