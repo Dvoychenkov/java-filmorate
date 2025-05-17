@@ -15,7 +15,6 @@ import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import static ru.yandex.practicum.filmorate.validation.ValidationUtils.requireFound;
