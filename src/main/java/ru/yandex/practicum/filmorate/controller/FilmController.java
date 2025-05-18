@@ -85,4 +85,10 @@ public class FilmController {
         filmService.removeFilm(filmId);
         log.info("Фильм с ID {} удалён", filmId);
     }
+
+    @GetMapping("/search")
+    public Collection<FilmDto> searchFilms(@RequestParam String query, @RequestParam String by) {
+        log.info("Поиск фильмов по запросу {} с полями: {}", query, by);
+        return filmService.searchFilms(query, by);
+    }
 }

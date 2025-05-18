@@ -25,7 +25,7 @@ public class ReviewServiceBase implements ReviewService {
     private final ReviewStorage reviewStorage;
     private final ReviewMapper reviewMapper;
     private final UserService userService;
-    private final FilmService filmService;
+    private final FilmServiceBase filmServiceBase;
     private final FeedService feedService;
 
     @Override
@@ -55,7 +55,7 @@ public class ReviewServiceBase implements ReviewService {
     @Override
     public ReviewDto create(NewReviewRequest newRequestReview) {
         userService.getUserOrThrow(newRequestReview.getUserId()); // Проверка на наличие пользователя
-        filmService.getFilmOrThrow(newRequestReview.getFilmId()); // Проверка на наличие фильма
+        filmServiceBase.getFilmOrThrow(newRequestReview.getFilmId()); // Проверка на наличие фильма
 
         Review reviewToCreate = reviewMapper.mapToReview(newRequestReview);
         Review createdReview = reviewStorage.add(reviewToCreate);
