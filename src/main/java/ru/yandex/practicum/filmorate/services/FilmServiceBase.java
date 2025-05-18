@@ -14,20 +14,24 @@ import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
 import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ru.yandex.practicum.filmorate.validation.ValidationUtils.requireFound;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class FilmService {
+public class FilmServiceBase implements FilmService {
     private final FilmStorage filmStorage;
     private final FilmMapper filmMapper;
     private final UserService userService;
     private final FeedService feedService;
     private final DirectorService directorService;
 
+    @Override
     public Collection<FilmDto> getAll() {
         Collection<Film> films = filmStorage.getAll();
         log.info("Получено {} фильмов", films.size());
@@ -36,6 +40,7 @@ public class FilmService {
                 .toList();
     }
 
+    @Override
     public FilmDto create(NewFilmRequest newRequestFilm) {
         Film filmToCreate = filmMapper.mapToFilm(newRequestFilm);
         Film createdFilm = filmStorage.add(filmToCreate);
@@ -44,6 +49,7 @@ public class FilmService {
         return filmMapper.mapToFilmDto(createdFilm);
     }
 
+    @Override
     public FilmDto update(UpdateFilmRequest updateRequestFilm) {
         Film filmToUpdate = getFilmOrThrow(updateRequestFilm.getId());
         filmMapper.updateFilmFromRequest(filmToUpdate, updateRequestFilm);
@@ -52,6 +58,7 @@ public class FilmService {
         return filmMapper.mapToFilmDto(updatedFilm);
     }
 
+    @Override
     public void addLike(Long filmId, Long userId) {
         getFilmOrThrow(filmId); // Проверка на наличие фильма
         userService.getUserOrThrow(userId); // Проверка на наличие пользователя
@@ -66,6 +73,7 @@ public class FilmService {
         }
     }
 
+    @Override
     public void removeLike(Long filmId, Long userId) {
         getFilmOrThrow(filmId); // Проверка на наличие фильма
         userService.getUserOrThrow(userId); // Проверка на наличие пользователя
@@ -80,6 +88,7 @@ public class FilmService {
         }
     }
 
+    @Override
     public Collection<FilmDto> getTopFilmsByLikes(int filmsLimit, Integer genreId, Integer year) {
         if (filmsLimit <= 0) {
             log.warn("Передан некорректный параметр count = {}, используется значение по умолчанию", filmsLimit);
@@ -94,10 +103,12 @@ public class FilmService {
                 .toList();
     }
 
+    @Override
     public FilmDto getFilm(Long id) {
         return filmMapper.mapToFilmDto(getFilmOrThrow(id));
     }
 
+    @Override
     public Film getFilmOrThrow(Long id) {
         if (id == null) throw new ValidationException("Некорректный ID фильма");
         Film film = requireFound(filmStorage.getById(id), () -> "Фильм с ID " + id + " не найден");
@@ -105,6 +116,7 @@ public class FilmService {
         return film;
     }
 
+    @Override
     public Collection<FilmDto> getDirectorFilmsSortedByLikes(Long directorId) {
         directorService.getDirectorOrThrow(directorId);
         Collection<Film> directorFilmsSortedByLikes = filmStorage.getDirectorFilmsSortedByLikes(directorId);
@@ -114,6 +126,7 @@ public class FilmService {
                 .toList();
     }
 
+    @Override
     public Collection<FilmDto> getDirectorFilmsSortedByYears(Long directorId) {
         directorService.getDirectorOrThrow(directorId);
         Collection<Film> directorFilmsSortedByYears = filmStorage.getDirectorFilmsSortedByYears(directorId);
@@ -123,6 +136,7 @@ public class FilmService {
                 .toList();
     }
 
+    @Override
     public Collection<FilmDto> getCommonFilms(Long userId, Long friendId) {
         userService.getUserOrThrow(userId); // Проверка на наличие пользователя
         userService.getUserOrThrow(friendId); // Проверка на наличие друга
@@ -135,8 +149,26 @@ public class FilmService {
         return commonFilmsList;
     }
 
+    @Override
     public void removeFilm(Long id) {
         filmStorage.removeFilm(id);
         log.info("Фильм с ID {} удалён", id);
     }
+
+    @Override
+    public Collection<FilmDto> searchFilms(String query, String by) {
+        log.info("Поиск фильмов по запросу {} с полями: {}", query, by);
+        Set<String> searchFields = Arrays.stream(by.split(","))
+                .map(String::trim)
+                .map(String::toLowerCase)
+                .collect(Collectors.toSet());
+
+        Collection<Film> films = filmStorage.searchFilms(query, searchFields);
+        log.info("Найдено {} фильмов по запросу {}", films.size(), query);
+        return films.stream()
+                .map(filmMapper::mapToFilmDto)
+                .toList();
+    }
+
+
 }
