@@ -8,10 +8,12 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.NewFilmRequest;
 import ru.yandex.practicum.filmorate.dto.UpdateFilmRequest;
+import ru.yandex.practicum.filmorate.model.enums.SearchByField;
 import ru.yandex.practicum.filmorate.model.enums.SortOption;
 import ru.yandex.practicum.filmorate.services.FilmService;
 
 import java.util.Collection;
+import java.util.Set;
 
 @Slf4j
 @RestController
@@ -85,4 +87,11 @@ public class FilmController {
         filmService.removeFilm(filmId);
         log.info("Фильм с ID {} удалён", filmId);
     }
+
+    @GetMapping("/search")
+    public Collection<FilmDto> searchFilms(@RequestParam String query, @RequestParam Set<SearchByField> by) {
+        log.info("Поиск фильмов по запросу '{}' по полям: {}", query, by);
+        return filmService.searchFilms(query, by);
+    }
+
 }
