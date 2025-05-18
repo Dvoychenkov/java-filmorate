@@ -4,8 +4,10 @@ import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.NewFilmRequest;
 import ru.yandex.practicum.filmorate.dto.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.enums.SearchByField;
 
 import java.util.Collection;
+import java.util.Set;
 
 public interface FilmService {
     Collection<FilmDto> getAll();
@@ -32,5 +34,5 @@ public interface FilmService {
 
     void removeFilm(Long id);
 
-    Collection<FilmDto> searchFilms(String query, String by);
+    Collection<FilmDto> searchFilms(String query, Set<SearchByField> by);
 }

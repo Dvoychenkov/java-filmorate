@@ -113,35 +113,35 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
                 ORDER BY likes_count DESC;
             """;
     private static final String SQL_SELECT_TOP_FILMS_BY_GENRE = """
-                 SELECT f.*
-                 FROM films f
-                 JOIN films_genres fg ON f.id = fg.film_id
-                 LEFT JOIN films_users_likes l ON f.id = l.film_id
-                 WHERE fg.genre_id = ?
-                 GROUP BY f.id
-                 ORDER BY COUNT(l.user_id) DESC
-                 LIMIT ?
-             """;
+                SELECT f.*
+                FROM films f
+                JOIN films_genres fg ON f.id = fg.film_id
+                LEFT JOIN films_users_likes l ON f.id = l.film_id
+                WHERE fg.genre_id = ?
+                GROUP BY f.id
+                ORDER BY COUNT(l.user_id) DESC
+                LIMIT ?
+            """;
     private static final String SQL_SELECT_TOP_FILMS_BY_YEAR = """
-                 SELECT f.*
-                 FROM films f
-                 LEFT JOIN films_users_likes l ON f.id = l.film_id
-                 WHERE EXTRACT(YEAR FROM release_date) = ?
-                 GROUP BY f.id
-                 ORDER BY COUNT(l.user_id) DESC
-                 LIMIT ?
-             """;
+                SELECT f.*
+                FROM films f
+                LEFT JOIN films_users_likes l ON f.id = l.film_id
+                WHERE EXTRACT(YEAR FROM release_date) = ?
+                GROUP BY f.id
+                ORDER BY COUNT(l.user_id) DESC
+                LIMIT ?
+            """;
     private static final String SQL_SELECT_TOP_FILMS_BY_GENRE_AND_YEAR = """
-                 SELECT f.*
-                 FROM films f
-                 JOIN films_genres fg ON f.id = fg.film_id
-                 LEFT JOIN films_users_likes l ON f.id = l.film_id
-                 WHERE EXTRACT(YEAR FROM release_date) = ?
-                 AND fg.genre_id = ?
-                 GROUP BY f.id
-                 ORDER BY COUNT(l.user_id) DESC
-                 LIMIT ?
-             """;
+                SELECT f.*
+                FROM films f
+                JOIN films_genres fg ON f.id = fg.film_id
+                LEFT JOIN films_users_likes l ON f.id = l.film_id
+                WHERE EXTRACT(YEAR FROM release_date) = ?
+                AND fg.genre_id = ?
+                GROUP BY f.id
+                ORDER BY COUNT(l.user_id) DESC
+                LIMIT ?
+            """;
 
     private static final String SQL_SEARCH_FILM_BASE = """
             SELECT
@@ -300,14 +300,13 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
 
         String where = "WHERE " + String.join(" OR ", conditions);
         String groupAndOrder = """
-            GROUP BY f.id, f.name, f.description, f.release_date, f.duration, f.mpa_rating_id, m.name
-            ORDER BY like_count DESC, f.id ASC
-            """;
+                GROUP BY f.id, f.name, f.description, f.release_date, f.duration, f.mpa_rating_id, m.name
+                ORDER BY like_count DESC, f.id ASC
+                """;
         String finalQuery = SQL_SEARCH_FILM_BASE + " " + where + " " + groupAndOrder;
 
         return queryMany(finalQuery, params.toArray());
     }
-
 
     private void insertGenres(Long filmId, List<Genre> genres) {
         if (genres == null) return;

@@ -12,9 +12,9 @@ import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
 import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
+import ru.yandex.practicum.filmorate.model.enums.SearchByField;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -155,20 +155,27 @@ public class FilmServiceBase implements FilmService {
         log.info("Фильм с ID {} удалён", id);
     }
 
-    @Override
-    public Collection<FilmDto> searchFilms(String query, String by) {
-        log.info("Поиск фильмов по запросу {} с полями: {}", query, by);
-        Set<String> searchFields = Arrays.stream(by.split(","))
-                .map(String::trim)
-                .map(String::toLowerCase)
+    public Collection<FilmDto> searchFilms(String query, Set<SearchByField> by) {
+        if (query == null || query.isBlank()) {
+            throw new ValidationException("Параметр 'query' не должен быть пустым");
+        }
+
+        if (by == null || by.isEmpty()) {
+            throw new ValidationException("Параметр 'by' должен содержать хотя бы одно из значений: title, director");
+        }
+
+        Set<String> searchFields = by.stream()
+                .map(field -> switch (field) {
+                    case TITLE -> "title";
+                    case DIRECTOR -> "director";
+                })
                 .collect(Collectors.toSet());
 
         Collection<Film> films = filmStorage.searchFilms(query, searchFields);
-        log.info("Найдено {} фильмов по запросу {}", films.size(), query);
+        log.info("Найдено {} фильмов по запросу '{}' и полям: {}", films.size(), query, searchFields);
+
         return films.stream()
                 .map(filmMapper::mapToFilmDto)
                 .toList();
     }
-
-
 }
