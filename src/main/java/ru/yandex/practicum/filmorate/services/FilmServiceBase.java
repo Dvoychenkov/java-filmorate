@@ -65,12 +65,12 @@ public class FilmServiceBase implements FilmService {
 
         boolean added = filmStorage.addLike(filmId, userId);
         if (added) {
-            FeedEvent feedEvent = new FeedEvent(userId, FeedEventType.LIKE, FeedOperation.ADD, filmId);
-            feedService.addEvent(feedEvent);
             log.info("Пользователь {} поставил лайк фильму {}", userId, filmId);
         } else {
             log.info("Пользователь {} уже ставил лайк фильму {}", userId, filmId);
         }
+
+        feedService.addEvent(new FeedEvent(userId, FeedEventType.LIKE, FeedOperation.ADD, filmId));
     }
 
     @Override
@@ -80,12 +80,12 @@ public class FilmServiceBase implements FilmService {
 
         boolean removed = filmStorage.removeLike(filmId, userId);
         if (removed) {
-            FeedEvent feedEvent = new FeedEvent(userId, FeedEventType.LIKE, FeedOperation.REMOVE, filmId);
-            feedService.addEvent(feedEvent);
             log.info("Пользователь {} убрал лайк с фильма {}", userId, filmId);
         } else {
             log.info("Пользователь {} не ставил лайк фильму {}", userId, filmId);
         }
+
+        feedService.addEvent(new FeedEvent(userId, FeedEventType.LIKE, FeedOperation.REMOVE, filmId));
     }
 
     @Override

@@ -60,10 +60,10 @@ public class ReviewServiceBase implements ReviewService {
         Review reviewToCreate = reviewMapper.mapToReview(newRequestReview);
         Review createdReview = reviewStorage.add(reviewToCreate);
         if (createdReview == null) throw new IllegalStateException("Не удалось сохранить данные для нового отзыва");
-        FeedEvent feedEvent = new FeedEvent(createdReview.getUserId(), FeedEventType.REVIEW, FeedOperation.ADD,
-                createdReview.getId());
-        feedService.addEvent(feedEvent);
         log.info("Создан отзыв: {}", createdReview);
+
+        feedService.addEvent(new FeedEvent(createdReview.getUserId(), FeedEventType.REVIEW, FeedOperation.ADD,
+                createdReview.getId()));
         return reviewMapper.mapToReviewDto(createdReview);
     }
 
@@ -72,21 +72,22 @@ public class ReviewServiceBase implements ReviewService {
         Review reviewToUpdate = getReviewOrThrow(updateRequestReview.getReviewId());
         reviewMapper.updateReviewFromRequest(reviewToUpdate, updateRequestReview);
         Review updatedReview = reviewStorage.update(reviewToUpdate);
-        FeedEvent feedEvent = new FeedEvent(updatedReview.getUserId(), FeedEventType.REVIEW, FeedOperation.UPDATE,
-                updatedReview.getId());
-        feedService.addEvent(feedEvent);
         log.info("Обновлён отзыв: {}", updatedReview);
+
+        feedService.addEvent(new FeedEvent(updatedReview.getUserId(), FeedEventType.REVIEW, FeedOperation.UPDATE,
+                updatedReview.getId()));
         return reviewMapper.mapToReviewDto(updatedReview);
     }
 
     @Override
     public void delete(Long reviewId) {
         Review review = getReviewOrThrow(reviewId); // Проверка на наличие отзыва
+
         reviewStorage.deleteById(reviewId);
-        FeedEvent feedEvent = new FeedEvent(review.getUserId(), FeedEventType.REVIEW, FeedOperation.REMOVE,
-                review.getId());
-        feedService.addEvent(feedEvent);
         log.info("Отзыв с ID {} удалён", reviewId);
+
+        feedService.addEvent(new FeedEvent(review.getUserId(), FeedEventType.REVIEW, FeedOperation.REMOVE,
+                review.getId()));
     }
 
     @Override

@@ -65,14 +65,12 @@ public class UserService {
         FriendshipAddResult friendshipAddResult = userStorage.addFriend(userId, friendId);
         switch (friendshipAddResult) {
             case FRIEND_REQUEST_ADDED -> {
-                FeedEvent feedEvent = new FeedEvent(userId, FeedEventType.FRIEND, FeedOperation.ADD, friendId);
-                feedService.addEvent(feedEvent);
+                feedService.addEvent(new FeedEvent(userId, FeedEventType.FRIEND, FeedOperation.ADD, friendId));
                 log.info("Отправлена новая заявка в друзья от {} к {}", userId, friendId);
             }
             case FRIEND_REQUEST_ALREADY_EXISTS -> log.info("Заявка в друзья уже была от {} к {}", userId, friendId);
             case FRIENDSHIP_CONFIRMED -> {
-                FeedEvent feedEvent = new FeedEvent(userId, FeedEventType.FRIEND, FeedOperation.ADD, friendId);
-                feedService.addEvent(feedEvent);
+                feedService.addEvent(new FeedEvent(userId, FeedEventType.FRIEND, FeedOperation.ADD, friendId));
                 log.info("Дружба подтверждена между {} и {}", userId, friendId);
             }
             case FRIENDSHIP_ALREADY_EXISTS -> log.info("Дружба уже существует между {} и {}", userId, friendId);
@@ -87,13 +85,11 @@ public class UserService {
         FriendshipRemoveResult friendshipRemoveResult = userStorage.removeFriend(userId, friendId);
         switch (friendshipRemoveResult) {
             case CONFIRMED_FRIENDSHIP_REMOVED -> {
-                FeedEvent feedEvent = new FeedEvent(userId, FeedEventType.FRIEND, FeedOperation.REMOVE, friendId);
-                feedService.addEvent(feedEvent);
+                feedService.addEvent(new FeedEvent(userId, FeedEventType.FRIEND, FeedOperation.REMOVE, friendId));
                 log.info("Дружба отменена от {} к {}", userId, friendId);
             }
             case FRIEND_REQUEST_REMOVED -> {
-                FeedEvent feedEvent = new FeedEvent(userId, FeedEventType.FRIEND, FeedOperation.REMOVE, friendId);
-                feedService.addEvent(feedEvent);
+                feedService.addEvent(new FeedEvent(userId, FeedEventType.FRIEND, FeedOperation.REMOVE, friendId));
                 log.info("Заявка отменена от {} к {}", userId, friendId);
             }
             case NO_FRIENDSHIP -> log.info("Дружбы/заявки не было от {} к {}", userId, friendId);
