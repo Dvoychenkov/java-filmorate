@@ -43,9 +43,7 @@ public class UserService {
     }
 
     public UserDto create(NewUserRequest newRequestUser) {
-        User userToCreate = userMapper.mapToUser(newRequestUser);
-        User createdUser = userStorage.add(userToCreate);
-        if (createdUser == null) throw new IllegalStateException("Не удалось сохранить данные для нового пользователя");
+        User createdUser = userStorage.add(userMapper.mapToUser(newRequestUser));
         log.info("Создан пользователь: {}", createdUser);
         return userMapper.mapToUserDto(createdUser);
     }

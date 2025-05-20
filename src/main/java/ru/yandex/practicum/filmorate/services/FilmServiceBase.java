@@ -43,9 +43,7 @@ public class FilmServiceBase implements FilmService {
 
     @Override
     public FilmDto create(NewFilmRequest newRequestFilm) {
-        Film filmToCreate = filmMapper.mapToFilm(newRequestFilm);
-        Film createdFilm = filmStorage.add(filmToCreate);
-        if (createdFilm == null) throw new IllegalStateException("Не удалось сохранить данные для нового фильма");
+        Film createdFilm = filmStorage.add(filmMapper.mapToFilm(newRequestFilm));
         log.info("Создан фильм: {}", createdFilm);
         return filmMapper.mapToFilmDto(createdFilm);
     }

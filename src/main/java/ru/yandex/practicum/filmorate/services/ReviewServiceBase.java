@@ -56,10 +56,8 @@ public class ReviewServiceBase implements ReviewService {
     public ReviewDto create(NewReviewRequest newRequestReview) {
         userService.getUserOrThrow(newRequestReview.getUserId()); // Проверка на наличие пользователя
         filmService.getFilmOrThrow(newRequestReview.getFilmId()); // Проверка на наличие фильма
-
-        Review reviewToCreate = reviewMapper.mapToReview(newRequestReview);
-        Review createdReview = reviewStorage.add(reviewToCreate);
-        if (createdReview == null) throw new IllegalStateException("Не удалось сохранить данные для нового отзыва");
+        
+        Review createdReview = reviewStorage.add(reviewMapper.mapToReview(newRequestReview));
         log.info("Создан отзыв: {}", createdReview);
 
         feedService.addEvent(new FeedEvent(createdReview.getUserId(), FeedEventType.REVIEW, FeedOperation.ADD,

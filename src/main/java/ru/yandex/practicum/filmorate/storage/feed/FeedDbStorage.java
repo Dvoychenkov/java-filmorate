@@ -37,9 +37,7 @@ public class FeedDbStorage extends BaseCRUDRepository<FeedEvent> implements Feed
                 feedEvent.getEventType().name(),
                 feedEvent.getOperation().name(),
                 feedEvent.getEntityId());
-        if (id == null) {
-            throw new IllegalStateException("Ошибка при добавлении события в feed: insert вернул null");
-        }
+        if (id == null) throw new IllegalStateException("Не удалось сохранить данные для события в feed");
 
         feedEvent.setEventId(id);
         log.info("Событие добавлено в ленту: {}", feedEvent);

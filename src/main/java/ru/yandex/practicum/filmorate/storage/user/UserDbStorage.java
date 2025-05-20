@@ -108,7 +108,7 @@ public class UserDbStorage extends BaseCRUDRepository<User> implements UserStora
                 user.getBirthday()
         );
 
-        if (id == null) return null;
+        if (id == null) throw new IllegalStateException("Не удалось сохранить данные для нового пользователя");
         user.setId(id);
 
         log.info("Пользователь добавлен в БД: {}", user);

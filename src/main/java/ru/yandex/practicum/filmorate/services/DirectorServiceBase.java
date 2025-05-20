@@ -31,9 +31,7 @@ public class DirectorServiceBase implements DirectorService {
 
     @Override
     public DirectorDto create(NewDirectorRequest newRequestDirector) {
-        Director directorToCreate = directorMapper.mapToDirector(newRequestDirector);
-        Director createdDirector = directorStorage.add(directorToCreate);
-        if (createdDirector == null) throw new IllegalStateException("Не удалось сохранить данные для нового режиссера");
+        Director createdDirector = directorStorage.add(directorMapper.mapToDirector(newRequestDirector));
         log.info("Создан режиссер: {}", createdDirector);
         return directorMapper.mapToDirectorDto(createdDirector);
     }

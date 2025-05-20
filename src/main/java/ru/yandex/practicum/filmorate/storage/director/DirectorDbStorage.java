@@ -63,7 +63,7 @@ public class DirectorDbStorage extends BaseCRUDRepository<Director> implements D
         Long id = insertAndReturnId(SQL_INSERT,
                 director.getName());
 
-        if (id == null) return null;
+        if (id == null) throw new IllegalStateException("Не удалось сохранить данные для нового режиссера");
         director.setId(id);
 
         log.info("Режиссер добавлен в БД: {}", director);

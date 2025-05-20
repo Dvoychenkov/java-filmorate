@@ -82,7 +82,7 @@ public class ReviewDbStorage extends BaseCRUDRepository<Review> implements Revie
                 0 // начальное значение useful (Рейтинг отзыва)
         );
 
-        if (id == null) return null;
+        if (id == null) throw new IllegalStateException("Не удалось сохранить данные для нового отзыва");
         review.setId(id);
         review.setUseful(0);
 

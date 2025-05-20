@@ -186,7 +186,7 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
                 film.getMpa().getId()
         );
 
-        if (id == null) return null;
+        if (id == null) throw new IllegalStateException("Не удалось сохранить данные для нового фильма");
         film.setId(id);
 
         insertGenres(id, film.getGenres());
