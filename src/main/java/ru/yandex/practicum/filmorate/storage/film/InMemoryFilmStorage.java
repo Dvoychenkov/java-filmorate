@@ -84,7 +84,6 @@ public class InMemoryFilmStorage implements FilmStorage {
         throw new UnsupportedOperationException();
     }
 
-    // TODO улучшим?
     @Override
     public Collection<Film> getCommonFilms(Long userId, Long friendId) {
         return getAll().stream()
