@@ -1,12 +1,12 @@
 package ru.yandex.practicum.filmorate.mapper;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.dto.*;
+import ru.yandex.practicum.filmorate.dto.DirectorDto;
+import ru.yandex.practicum.filmorate.dto.NewDirectorRequest;
+import ru.yandex.practicum.filmorate.dto.UpdateDirectorRequest;
 import ru.yandex.practicum.filmorate.model.Director;
 
 @Component
-@RequiredArgsConstructor
 public class DirectorMapper {
     public Director mapToDirector(NewDirectorRequest request) {
         Director director = new Director();
