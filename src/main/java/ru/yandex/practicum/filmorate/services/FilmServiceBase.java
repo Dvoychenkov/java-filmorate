@@ -80,11 +80,10 @@ public class FilmServiceBase implements FilmService {
         boolean removed = filmStorage.removeLike(filmId, userId);
         if (removed) {
             log.info("Пользователь {} убрал лайк с фильма {}", userId, filmId);
+            feedService.addEvent(new FeedEvent(userId, FeedEventType.LIKE, FeedOperation.REMOVE, filmId));
         } else {
             log.info("Пользователь {} не ставил лайк фильму {}", userId, filmId);
         }
-
-        feedService.addEvent(new FeedEvent(userId, FeedEventType.LIKE, FeedOperation.REMOVE, filmId));
     }
 
     @Override
