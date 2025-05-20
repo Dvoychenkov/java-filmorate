@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.*;
 import ru.yandex.practicum.filmorate.services.DirectorService;
+import ru.yandex.practicum.filmorate.validation.IdValid;
 
 import java.util.Collection;
 
@@ -22,7 +23,7 @@ public class DirectorController {
     }
 
     @GetMapping("/{directorId}")
-    public DirectorDto getById(@PathVariable Long directorId) {
+    public DirectorDto getById(@IdValid("directorId") @PathVariable Long directorId) {
         return directorService.getDirector(directorId);
     }
 
@@ -34,7 +35,7 @@ public class DirectorController {
     }
 
     @DeleteMapping("/{directorId}")
-    public void delete(@PathVariable Long directorId) {
+    public void delete(@IdValid("directorId") @PathVariable Long directorId) {
         directorService.delete(directorId);
         log.info("Удалён режиссер с id: {}", directorId);
     }

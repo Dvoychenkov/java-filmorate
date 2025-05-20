@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.NewReviewRequest;
 import ru.yandex.practicum.filmorate.dto.ReviewDto;
 import ru.yandex.practicum.filmorate.dto.UpdateReviewRequest;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.ReviewMapper;
 import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.Review;
@@ -30,13 +29,6 @@ public class ReviewServiceBase implements ReviewService {
 
     @Override
     public Collection<ReviewDto> getAll(Long filmId, Integer reviewsCount) {
-        // Если кол-во не указано, то по дефолту берём 10
-        if (reviewsCount == null || reviewsCount <= 0) {
-            log.info("Не передан корректный параметр count = {}, используется значение по умолчанию", reviewsCount);
-            reviewsCount = 10;
-        }
-
-        // Если фильм не указан, то все отзывы
         Collection<Review> reviews;
         if (filmId == null) {
             reviews = reviewStorage.getAll(reviewsCount);
@@ -56,7 +48,7 @@ public class ReviewServiceBase implements ReviewService {
     public ReviewDto create(NewReviewRequest newRequestReview) {
         userService.getUserOrThrow(newRequestReview.getUserId()); // Проверка на наличие пользователя
         filmService.getFilmOrThrow(newRequestReview.getFilmId()); // Проверка на наличие фильма
-        
+
         Review createdReview = reviewStorage.add(reviewMapper.mapToReview(newRequestReview));
         log.info("Создан отзыв: {}", createdReview);
 
@@ -130,7 +122,6 @@ public class ReviewServiceBase implements ReviewService {
     }
 
     private Review getReviewOrThrow(Long id) {
-        if (id == null) throw new ValidationException("Некорректный ID отзыва");
         Review review = requireFound(reviewStorage.getById(id), () -> "Отзыв с ID " + id + " не найден");
         log.info("Получен отзыв по ID {}: {}", id, review);
         return review;

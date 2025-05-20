@@ -1,6 +1,9 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -11,6 +14,7 @@ import ru.yandex.practicum.filmorate.dto.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.model.enums.SearchByField;
 import ru.yandex.practicum.filmorate.model.enums.SortOption;
 import ru.yandex.practicum.filmorate.services.FilmService;
+import ru.yandex.practicum.filmorate.validation.IdValid;
 
 import java.util.Collection;
 import java.util.Set;
@@ -28,7 +32,7 @@ public class FilmController {
     }
 
     @GetMapping("/{filmId}")
-    public FilmDto getById(@PathVariable Long filmId) {
+    public FilmDto getById(@IdValid("filmId") @PathVariable Long filmId) {
         return filmService.getFilm(filmId);
     }
 
@@ -48,42 +52,61 @@ public class FilmController {
 
     @PutMapping("/{filmId}/like/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT) // 204
-    public void addLike(@PathVariable Long filmId, @PathVariable Long userId) {
+    public void addLike(
+            @IdValid("filmId") @PathVariable Long filmId,
+            @IdValid("userId") @PathVariable Long userId
+    ) {
         filmService.addLike(filmId, userId);
         log.info("Пользователь {} поставил лайк фильму {}", userId, filmId);
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
-    public void removeLike(@PathVariable Long filmId, @PathVariable Long userId) {
+    public void removeLike(
+            @IdValid("filmId") @PathVariable Long filmId,
+            @IdValid("userId") @PathVariable Long userId
+    ) {
         filmService.removeLike(filmId, userId);
         log.info("Пользователь {} убрал лайк с фильма {}", userId, filmId);
     }
 
     @GetMapping("/popular")
-    public Collection<FilmDto> getPopular(@RequestParam(defaultValue = "10") int count,
-                                          @RequestParam(name = "genreId", required = false) Integer genreId,
-                                          @RequestParam(name = "year", required = false) Integer year) {
+    public Collection<FilmDto> getPopular(
+            @Min(value = 1, message = "Параметр 'count' должен быть положительным числом")
+            @RequestParam(defaultValue = "10") int count,
+            @RequestParam(name = "genreId", required = false) Integer genreId,
+            @RequestParam(name = "year", required = false) Integer year
+    ) {
         return filmService.getTopFilmsByLikes(count, genreId, year);
     }
 
     @GetMapping("/director/{directorId}")
-    public Collection<FilmDto> getDirectorFilms(@PathVariable Long directorId, @RequestParam SortOption sortBy) {
+    public Collection<FilmDto> getDirectorFilms(
+            @IdValid("directorId") @PathVariable Long directorId,
+            @RequestParam SortOption sortBy
+    ) {
         return filmService.getDirectorFilms(directorId, sortBy);
     }
 
     @GetMapping("/common")
-    public Collection<FilmDto> getCommonFilms(@RequestParam Long userId, @RequestParam Long friendId) {
+    public Collection<FilmDto> getCommonFilms(
+            @IdValid("userId") @RequestParam Long userId,
+            @IdValid("friendId") @RequestParam Long friendId
+    ) {
         return filmService.getCommonFilms(userId, friendId);
     }
 
     @DeleteMapping("/{filmId}")
-    public void removeFilm(@PathVariable Long filmId) {
+    public void removeFilm(@IdValid("filmId") @PathVariable Long filmId) {
         filmService.removeFilm(filmId);
         log.info("Фильм с ID {} удалён", filmId);
     }
 
     @GetMapping("/search")
-    public Collection<FilmDto> searchFilms(@RequestParam String query, @RequestParam Set<SearchByField> by) {
+    public Collection<FilmDto> searchFilms(
+            @NotBlank(message = "Параметр 'query' не должен быть пустым") @RequestParam String query,
+            @Size(min = 1, message = "Параметр 'by' должен содержать хотя бы одно из значений: title, director")
+            @RequestParam Set<SearchByField> by
+    ) {
         log.info("Поиск фильмов по запросу '{}' по полям: {}", query, by);
         return filmService.searchFilms(query, by);
     }

@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.NewFilmRequest;
 import ru.yandex.practicum.filmorate.dto.UpdateFilmRequest;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -88,11 +87,6 @@ public class FilmServiceBase implements FilmService {
 
     @Override
     public Collection<FilmDto> getTopFilmsByLikes(int filmsLimit, Integer genreId, Integer year) {
-        if (filmsLimit <= 0) {
-            log.warn("Передан некорректный параметр count = {}, используется значение по умолчанию", filmsLimit);
-            filmsLimit = 10;
-        }
-
         Collection<Film> top = filmStorage.getTopFilmsByLikes(filmsLimit, genreId, year);
         log.info("Возвращён топ {} фильмов по лайкам", top.size());
         log.info("ID фильмов из топа: {}", top.stream().map(Film::getId).toList());
@@ -108,7 +102,6 @@ public class FilmServiceBase implements FilmService {
 
     @Override
     public Film getFilmOrThrow(Long id) {
-        if (id == null) throw new ValidationException("Некорректный ID фильма");
         Film film = requireFound(filmStorage.getById(id), () -> "Фильм с ID " + id + " не найден");
         log.info("Получен фильм по ID {}: {}", id, film);
         return film;
@@ -122,7 +115,7 @@ public class FilmServiceBase implements FilmService {
         switch (sortBy) {
             case SortOption.YEAR -> directorFilms = filmStorage.getDirectorFilmsSortedByYears(directorId);
             case SortOption.LIKES -> directorFilms = filmStorage.getDirectorFilmsSortedByLikes(directorId);
-            default -> throw new UnsupportedOperationException("Некорректный тип сортировки 'by'");
+            default -> throw new UnsupportedOperationException();
         }
 
         log.info("ID фильмов режиссера с сортировкой {} по годам: {}",
@@ -152,14 +145,6 @@ public class FilmServiceBase implements FilmService {
     }
 
     public Collection<FilmDto> searchFilms(String query, Set<SearchByField> by) {
-        if (query == null || query.isBlank()) {
-            throw new ValidationException("Параметр 'query' не должен быть пустым");
-        }
-
-        if (by == null || by.isEmpty()) {
-            throw new ValidationException("Параметр 'by' должен содержать хотя бы одно из значений: title, director");
-        }
-
         Set<String> searchFields = by.stream()
                 .map(field -> switch (field) {
                     case TITLE -> "title";
