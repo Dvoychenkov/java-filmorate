@@ -150,7 +150,8 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
                 LIMIT ?
             """;
 
-    private static final String SQL_SEARCH_FILM_BASE = """
+    // Поиск фильмов
+    private static final String SQL_SEARCH_FILMS_SELECT = """
             SELECT
                 f.id,
                 f.name,
@@ -165,6 +166,10 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
             LEFT JOIN films_users_likes l ON f.id = l.film_id
             LEFT JOIN films_directors fd ON f.id = fd.film_id
             LEFT JOIN directors d ON fd.director_id = d.id
+            """;
+    public static final String SQL_SEARCH_FILMS_GROUP_AND_ORDER = """
+            GROUP BY f.id, f.name, f.description, f.release_date, f.duration, f.mpa_rating_id, m.name
+            ORDER BY like_count DESC, f.id ASC
             """;
 
     public FilmDbStorage(JdbcTemplate jdbcTemplate, FilmRowMapper filmRowMapper) {
@@ -305,14 +310,10 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
             }
         }
 
-        String where = "WHERE " + String.join(" OR ", conditions);
-        String groupAndOrder = """
-                GROUP BY f.id, f.name, f.description, f.release_date, f.duration, f.mpa_rating_id, m.name
-                ORDER BY like_count DESC, f.id ASC
-                """;
-        String finalQuery = SQL_SEARCH_FILM_BASE + " " + where + " " + groupAndOrder;
+        String where = conditions.isEmpty() ? "" : "WHERE " + String.join(" OR ", conditions);
 
-        return queryMany(finalQuery, params.toArray());
+        String fullQuery = String.format("%s %s %s", SQL_SEARCH_FILMS_SELECT, where, SQL_SEARCH_FILMS_GROUP_AND_ORDER);
+        return queryMany(fullQuery, params.toArray());
     }
 
     private void insertGenres(Long filmId, List<Genre> genres) {

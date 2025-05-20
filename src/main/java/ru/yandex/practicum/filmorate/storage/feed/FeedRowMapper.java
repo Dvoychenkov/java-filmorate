@@ -21,13 +21,12 @@ public class FeedRowMapper implements RowMapper<FeedEvent> {
 
         try {
             event.setEventType(FeedEventType.valueOf(rs.getString("event_type")));
-        } catch (IllegalArgumentException e) {
-            throw new SQLException("Неизвестный тип события в БД: " + rs.getString("event_type"), e);
-        }
-        try {
             event.setOperation(FeedOperation.valueOf(rs.getString("operation")));
         } catch (IllegalArgumentException e) {
-            throw new SQLException("Неизвестная тип операции в БД: " + rs.getString("operation"), e);
+            throw new SQLException(
+                    String.format("Некорректные параметры события: 'event_type': %s, 'operation': %s",
+                            rs.getString("event_type"), rs.getString("operation")
+                    ), e);
         }
 
         return event;
