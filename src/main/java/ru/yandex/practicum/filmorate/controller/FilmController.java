@@ -68,12 +68,7 @@ public class FilmController {
 
     @GetMapping("/director/{directorId}")
     public Collection<FilmDto> getDirectorFilms(@PathVariable Long directorId, @RequestParam SortOption sortBy) {
-        if (sortBy == SortOption.YEAR) {
-            return filmService.getDirectorFilmsSortedByYears(directorId);
-        } else if (sortBy == SortOption.LIKES) {
-            return filmService.getDirectorFilmsSortedByLikes(directorId);
-        }
-        throw new UnsupportedOperationException();
+        return filmService.getDirectorFilms(directorId, sortBy);
     }
 
     @GetMapping("/common")

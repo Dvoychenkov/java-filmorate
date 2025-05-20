@@ -13,6 +13,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
 import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.model.enums.SearchByField;
+import ru.yandex.practicum.filmorate.model.enums.SortOption;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.Collection;
@@ -117,21 +118,19 @@ public class FilmServiceBase implements FilmService {
     }
 
     @Override
-    public Collection<FilmDto> getDirectorFilmsSortedByLikes(Long directorId) {
-        directorService.getDirectorOrThrow(directorId);
-        Collection<Film> directorFilmsSortedByLikes = filmStorage.getDirectorFilmsSortedByLikes(directorId);
-        log.info("ID фильмов режиссера по лайкам: {}", directorFilmsSortedByLikes.stream().map(Film::getId).toList());
-        return directorFilmsSortedByLikes.stream()
-                .map(filmMapper::mapToFilmDto)
-                .toList();
-    }
+    public Collection<FilmDto> getDirectorFilms(Long directorId, SortOption sortBy) {
+        directorService.getDirectorOrThrow(directorId); // Проверка на наличие режиссёра
 
-    @Override
-    public Collection<FilmDto> getDirectorFilmsSortedByYears(Long directorId) {
-        directorService.getDirectorOrThrow(directorId);
-        Collection<Film> directorFilmsSortedByYears = filmStorage.getDirectorFilmsSortedByYears(directorId);
-        log.info("ID фильмов режиссера по годам: {}", directorFilmsSortedByYears.stream().map(Film::getId).toList());
-        return directorFilmsSortedByYears.stream()
+        Collection<Film> directorFilms;
+        switch (sortBy) {
+            case SortOption.YEAR -> directorFilms = filmStorage.getDirectorFilmsSortedByYears(directorId);
+            case SortOption.LIKES -> directorFilms = filmStorage.getDirectorFilmsSortedByLikes(directorId);
+            default -> throw new UnsupportedOperationException("Некорректный тип сортировки 'by'");
+        }
+
+        log.info("ID фильмов режиссера с сортировкой {} по годам: {}",
+                sortBy.name(), directorFilms.stream().map(Film::getId));
+        return directorFilms.stream()
                 .map(filmMapper::mapToFilmDto)
                 .toList();
     }

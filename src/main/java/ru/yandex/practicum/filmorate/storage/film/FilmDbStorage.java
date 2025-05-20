@@ -87,7 +87,14 @@ public class FilmDbStorage extends BaseCRUDRepository<Film> implements FilmStora
     private static final String SQL_INSERT_DIRECTOR = "INSERT INTO films_directors (film_id, director_id) VALUES (?, ?)";
     private static final String SQL_DELETE_DIRECTORS_BY_FILM_ID = "DELETE FROM films_directors WHERE film_id = ?";
 
-    private static final String SQL_DIRECTOR_FILMS_YEARS = "SELECT * FROM films f JOIN films_directors fd ON (f.id = fd.film_id) WHERE fd.director_id = ? ORDER BY release_date";
+    // Обработка информации о фильмах режиссёра
+    private static final String SQL_DIRECTOR_FILMS_YEARS = """
+            SELECT f.*
+            FROM films f
+            JOIN films_directors fd ON (f.id = fd.film_id)
+            WHERE fd.director_id = ?
+            ORDER BY release_date
+            """;
     private static final String SQL_DIRECTOR_FILMS_LIKES = """
                 SELECT f.*
                 FROM films f
