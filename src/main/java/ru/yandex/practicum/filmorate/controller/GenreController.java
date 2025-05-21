@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.dto.GenreDto;
 import ru.yandex.practicum.filmorate.services.GenreService;
+import ru.yandex.practicum.filmorate.validation.IdValid;
 
 import java.util.Collection;
 
@@ -22,7 +23,7 @@ public class GenreController {
     }
 
     @GetMapping("/{id}")
-    public GenreDto getById(@PathVariable Long id) {
+    public GenreDto getById(@IdValid @PathVariable Long id) {
         return genreService.getGenre(id);
     }
 }

@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.*;
@@ -64,12 +65,52 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> getTopFilmsByLikes(int count) {
+    public Collection<Film> getTopFilmsByLikes(int count, Integer genreId, Integer year) {
         Comparator<Film> filmTopByLikesComparator = Comparator.comparingInt(Film::getLikesUsersIdsSize).reversed();
         return getAll().stream()
                 .filter(Objects::nonNull)
                 .sorted(filmTopByLikesComparator)
                 .limit(count)
                 .toList();
+    }
+
+    @Override
+    public Collection<Film> getDirectorFilmsSortedByYears(Long directorId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Collection<Film> getDirectorFilmsSortedByLikes(Long directorId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Collection<Film> getCommonFilms(Long userId, Long friendId) {
+        return getAll().stream()
+                .filter(Objects::nonNull)
+                .filter(film -> film.getLikesUsersIds().contains(userId) && film.getLikesUsersIds().contains(friendId))
+                .sorted((film1, film2) -> Integer.compare(film2.getLikesUsersIds().size(), film1.getLikesUsersIds().size()))
+                .toList();
+    }
+
+    @Override
+    public void removeFilm(Long id) {
+        log.info("Удаление фильма с ID {}", id);
+        if (id == null || !films.containsKey(id)) {
+            log.warn("Фильм с ID {} не найден", id);
+            throw new NotFoundException("Фильм с id " + id + " не найден");
+        }
+        films.remove(id);
+        log.info("Фильм с ID {} удален", id);
+    }
+
+    @Override
+    public Collection<Film> getFilmsRecommendations(Long userId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Collection<Film> searchFilms(String query, Set<String> by) {
+        throw new UnsupportedOperationException();
     }
 }

@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.GenreDto;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.GenreMapper;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
@@ -33,7 +32,6 @@ public class GenreService {
     }
 
     public Genre getGenreOrThrow(Long id) {
-        if (id == null) throw new ValidationException("Некорректный ID жанра");
         Genre genre = requireFound(genreStorage.getById(id), () -> "Жанр с ID " + id + " не найден");
         log.info("Получен жанр по ID {}: {}", id, genre);
         return genre;

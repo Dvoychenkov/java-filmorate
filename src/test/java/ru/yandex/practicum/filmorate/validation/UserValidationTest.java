@@ -9,16 +9,13 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.dto.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.UserDto;
-import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.services.UserService;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static ru.yandex.practicum.filmorate.util.TestHelper.getUserController;
 
 public class UserValidationTest {
     private Validator validator;
@@ -118,10 +115,7 @@ public class UserValidationTest {
         NewUserRequest user = new NewUserRequest();
         user.setLogin("okLogin");
 
-        UserStorage userStorage = new InMemoryUserStorage();
-        UserMapper userMapper = new UserMapper();
-        UserService userService = new UserService(userStorage, userMapper);
-        UserController controller = new UserController(userService);
+        UserController controller = getUserController();
         UserDto createdUser = controller.create(user);
         assertEquals("okLogin", createdUser.getName());
 

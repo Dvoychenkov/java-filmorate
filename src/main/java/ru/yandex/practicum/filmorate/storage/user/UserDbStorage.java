@@ -81,6 +81,11 @@ public class UserDbStorage extends BaseCRUDRepository<User> implements UserStora
                     WHERE f1.user_id = ? AND f2.user_id = ?
                 )
             """;
+    private static final String SQL_DELETE_USER = "DELETE FROM users WHERE id = ?";
+    private static final String SQL_DELETE_USER_FRIENDSHIPS = """
+            DELETE FROM users_friendship
+            WHERE user_id = ? OR friend_id = ?
+            """;
 
 
     public UserDbStorage(JdbcTemplate jdbcTemplate, UserRowMapper userRowMapper) {
@@ -103,7 +108,7 @@ public class UserDbStorage extends BaseCRUDRepository<User> implements UserStora
                 user.getBirthday()
         );
 
-        if (id == null) return null;
+        if (id == null) throw new IllegalStateException("Не удалось сохранить данные для нового пользователя");
         user.setId(id);
 
         log.info("Пользователь добавлен в БД: {}", user);
@@ -202,6 +207,13 @@ public class UserDbStorage extends BaseCRUDRepository<User> implements UserStora
         Collection<User> commonFriends = queryMany(SQL_SELECT_COMMON_FRIENDS, userId, otherUserId);
         log.info("Получено {} общих друзей для юзеров {} и {} из БД", commonFriends.size(), userId, otherUserId);
         return commonFriends;
+    }
+
+    @Override
+    public void removeUser(Long id) {
+        update(SQL_DELETE_USER_FRIENDSHIPS, id, id);
+        update(SQL_DELETE_USER, id);
+        log.info("Пользователь с ID {} удалён из БД", id);
     }
 
     private int getStatusIdByCode(String code) {

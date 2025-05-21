@@ -5,9 +5,11 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.NewFilmRequest;
 import ru.yandex.practicum.filmorate.dto.UpdateFilmRequest;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MpaRating;
+import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaRatingStorage;
 import ru.yandex.practicum.filmorate.validation.ValidationUtils;
@@ -21,6 +23,7 @@ import java.util.Objects;
 public class FilmMapper {
     private final MpaRatingStorage mpaRatingStorage;
     private final GenreStorage genreStorage;
+    private final DirectorStorage directorStorage;
 
     public Film mapToFilm(NewFilmRequest request) {
         Film film = new Film();
@@ -30,6 +33,7 @@ public class FilmMapper {
         film.setDuration(request.getDuration());
         film.setMpa(resolveMpaRating(request.getMpa()));
         film.setGenres(resolveGenres(request.getGenres()));
+        film.setDirectors(resolveDirectors(request.getDirectors()));
         return film;
     }
 
@@ -40,6 +44,7 @@ public class FilmMapper {
         film.setDuration(request.getDuration());
         film.setMpa(resolveMpaRating(request.getMpa()));
         film.setGenres(resolveGenres(request.getGenres()));
+        film.setDirectors(resolveDirectors(request.getDirectors()));
     }
 
     public FilmDto mapToFilmDto(Film film) {
@@ -50,7 +55,8 @@ public class FilmMapper {
                 film.getReleaseDate(),
                 film.getDuration(),
                 film.getMpa(),
-                new ArrayList<>(film.getGenres())
+                new ArrayList<>(film.getGenres()),
+                new ArrayList<>(film.getDirectors())
         );
     }
 
@@ -60,6 +66,19 @@ public class FilmMapper {
                 mpaRatingStorage.getById(mpa.getId()),
                 () -> "MPA рейтинг с ID " + mpa.getId() + " не найден"
         );
+    }
+
+    private List<Director> resolveDirectors(List<Director> directors) {
+        if (directors == null || directors.isEmpty()) return List.of();
+        return directors.stream()
+                .filter(Objects::nonNull)
+                .map(director -> ValidationUtils.requireFound(
+                                directorStorage.getById(director.getId()),
+                                () -> "Режиссер с ID " + director.getId() + " не найден"
+                        )
+                )
+                .distinct()
+                .toList();
     }
 
     private List<Genre> resolveGenres(List<Genre> genres) {

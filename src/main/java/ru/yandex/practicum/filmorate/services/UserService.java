@@ -3,14 +3,21 @@ package ru.yandex.practicum.filmorate.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.UpdateUserRequest;
 import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
+import ru.yandex.practicum.filmorate.model.FeedEvent;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
+import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.model.enums.FriendshipAddResult;
 import ru.yandex.practicum.filmorate.model.enums.FriendshipRemoveResult;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
@@ -22,7 +29,10 @@ import static ru.yandex.practicum.filmorate.validation.ValidationUtils.requireFo
 @Slf4j
 public class UserService {
     private final UserStorage userStorage;
+    private final FilmStorage filmStorage;
     private final UserMapper userMapper;
+    private final FilmMapper filmMapper;
+    private final FeedService feedService;
 
     public Collection<UserDto> getAll() {
         Collection<User> users = userStorage.getAll();
@@ -33,9 +43,7 @@ public class UserService {
     }
 
     public UserDto create(NewUserRequest newRequestUser) {
-        User userToCreate = userMapper.mapToUser(newRequestUser);
-        User createdUser = userStorage.add(userToCreate);
-        if (createdUser == null) throw new IllegalStateException("Не удалось сохранить данные для нового пользователя");
+        User createdUser = userStorage.add(userMapper.mapToUser(newRequestUser));
         log.info("Создан пользователь: {}", createdUser);
         return userMapper.mapToUserDto(createdUser);
     }
@@ -54,9 +62,15 @@ public class UserService {
 
         FriendshipAddResult friendshipAddResult = userStorage.addFriend(userId, friendId);
         switch (friendshipAddResult) {
-            case FRIEND_REQUEST_ADDED -> log.info("Отправлена новая заявка в друзья от {} к {}", userId, friendId);
+            case FRIEND_REQUEST_ADDED -> {
+                feedService.addEvent(new FeedEvent(userId, FeedEventType.FRIEND, FeedOperation.ADD, friendId));
+                log.info("Отправлена новая заявка в друзья от {} к {}", userId, friendId);
+            }
             case FRIEND_REQUEST_ALREADY_EXISTS -> log.info("Заявка в друзья уже была от {} к {}", userId, friendId);
-            case FRIENDSHIP_CONFIRMED -> log.info("Дружба подтверждена между {} и {}", userId, friendId);
+            case FRIENDSHIP_CONFIRMED -> {
+                feedService.addEvent(new FeedEvent(userId, FeedEventType.FRIEND, FeedOperation.ADD, friendId));
+                log.info("Дружба подтверждена между {} и {}", userId, friendId);
+            }
             case FRIENDSHIP_ALREADY_EXISTS -> log.info("Дружба уже существует между {} и {}", userId, friendId);
             case UNKNOWN -> log.info("Неизвестное состояние создания дружбы между {} и {}", userId, friendId);
         }
@@ -68,8 +82,14 @@ public class UserService {
 
         FriendshipRemoveResult friendshipRemoveResult = userStorage.removeFriend(userId, friendId);
         switch (friendshipRemoveResult) {
-            case CONFIRMED_FRIENDSHIP_REMOVED -> log.info("Дружба отменена от {} к {}", userId, friendId);
-            case FRIEND_REQUEST_REMOVED -> log.info("Заявка отменена от {} к {}", userId, friendId);
+            case CONFIRMED_FRIENDSHIP_REMOVED -> {
+                feedService.addEvent(new FeedEvent(userId, FeedEventType.FRIEND, FeedOperation.REMOVE, friendId));
+                log.info("Дружба отменена от {} к {}", userId, friendId);
+            }
+            case FRIEND_REQUEST_REMOVED -> {
+                feedService.addEvent(new FeedEvent(userId, FeedEventType.FRIEND, FeedOperation.REMOVE, friendId));
+                log.info("Заявка отменена от {} к {}", userId, friendId);
+            }
             case NO_FRIENDSHIP -> log.info("Дружбы/заявки не было от {} к {}", userId, friendId);
             case UNKNOWN -> log.info("Неизвестное состояние разрыва дружбы между {} и {}", userId, friendId);
         }
@@ -100,6 +120,15 @@ public class UserService {
                 .toList();
     }
 
+    public Collection<FilmDto> getFilmsRecommendations(Long userId) {
+        getUserOrThrow(userId); // Проверка на наличие пользователя
+        Collection<Film> filmsRecommendations = filmStorage.getFilmsRecommendations(userId);
+        log.info("Получено {} рекомендаций для пользователя {}", filmsRecommendations.size(), userId);
+        return filmsRecommendations.stream()
+                .map(filmMapper::mapToFilmDto)
+                .toList();
+    }
+
     public UserDto getUser(Long id) {
         return userMapper.mapToUserDto(getUserOrThrow(id));
     }
@@ -109,5 +138,10 @@ public class UserService {
         User user = requireFound(userStorage.getById(id), () -> "Пользователь с ID " + id + " не найден");
         log.info("Получен пользователь по ID {}: {}", id, user);
         return user;
+    }
+
+    public void removeUser(Long id) {
+        userStorage.removeUser(id);
+        log.info("Пользователь с ID {} удалён", id);
     }
 }

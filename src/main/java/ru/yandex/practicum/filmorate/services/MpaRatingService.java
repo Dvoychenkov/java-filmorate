@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.MpaRatingDto;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.MpaRatingMapper;
 import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaRatingStorage;
@@ -33,7 +32,6 @@ public class MpaRatingService {
     }
 
     public MpaRating getMpaRatingOrThrow(Long id) {
-        if (id == null) throw new ValidationException("Некорректный ID рейтинга");
         MpaRating mpaRating = requireFound(mpaRatingStorage.getById(id), () -> "MPA рейтинг с ID " + id + " не найден");
         log.info("Получен MPA рейтинг по ID {}: {}", id, mpaRating);
         return mpaRating;
